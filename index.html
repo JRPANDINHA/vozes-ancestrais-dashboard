@@ -2,55 +2,346 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Vozes Ancestrais — TUPBI</title>
+<title>Vozes Ancestrais — Central</title>
 <style>
-:root{--g:#173b2d;--gold:#c8a45d;--cream:#f7f3eb;--line:#ddd4c7}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--cream);color:#292622}
-header{background:var(--g);color:#fff;border-bottom:4px solid var(--gold);padding:15px 24px}.head{max-width:1180px;margin:auto;display:flex;justify-content:space-between;align-items:center}.brand small{color:#ead7a9;letter-spacing:.13em}.brand h1{font:700 31px Georgia,serif;margin:2px 0}.tag{color:#ead7a9;font:italic 14px Georgia,serif}
-.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer}.gold{background:var(--gold);color:#211b15}.primary{background:var(--g);color:#fff}.ghost{background:#eee7dc;color:#332c26}
-main{max-width:1180px;margin:auto;padding:24px}.cover{border-radius:19px;padding:28px;min-height:190px;color:#fff;display:flex;align-items:flex-end;background:linear-gradient(120deg,#15382a,#42573d 58%,#806847)}.cover h2{font:700 52px Georgia,serif;margin:0 0 8px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:20px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 3px 12px #0000000a}.big{font-size:48px;color:var(--g);margin:12px 0}.episodes{margin-top:18px}.ep{margin:8px 0}.login{display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center;padding:18px}.login.on{display:flex}.box{width:min(410px,100%);background:#fff;border-radius:16px;padding:22px}input{width:100%;padding:11px;border:1px solid #cfc5b7;border-radius:8px;margin:5px 0 12px}.msg{font-size:13px;margin-top:9px;color:#8b3838}.private{display:none}.private.on{display:block}.public.off{display:none}.ok{color:#356246}
-@media(max-width:800px){.stats{grid-template-columns:1fr}.cover h2{font-size:38px}}
+:root{--g:#173b2d;--g2:#244b39;--gold:#c8a45d;--cream:#f7f3eb;--line:#ddd4c7;--red:#8b3838;--muted:#74695f}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--cream);color:#292622}button,input,textarea,select{font:inherit}
+header{background:var(--g);color:#fff;border-bottom:4px solid var(--gold);padding:15px 24px;position:sticky;top:0;z-index:30}
+.head{max-width:1280px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand small{color:#ead7a9;letter-spacing:.13em}.brand h1{font:700 31px Georgia,serif;margin:2px 0}
+.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer}.primary{background:var(--g);color:#fff}.gold{background:var(--gold);color:#211b15}.ghost{background:#eee7dc;color:#332c26}.danger{background:var(--red);color:#fff;cursor:pointer;opacity:1!important;pointer-events:auto!important}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 3px 12px #0000000a}.public{max-width:1280px;margin:auto;padding:24px}.public.hidden{display:none}
+.cover{border-radius:19px;padding:28px;min-height:205px;color:#fff;display:flex;align-items:flex-end;background:linear-gradient(120deg,#15382a,#42573d 58%,#806847)}.cover h2{font:700 54px Georgia,serif;margin:0 0 10px;color:#fff;text-shadow:0 2px 8px #0005}
+.section-title{font:700 27px Georgia,serif;color:var(--g);margin:27px 0 13px}.stats,.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.calbox{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px}.calhead{display:flex;align-items:center;justify-content:space-between;gap:10px}.calhead h3{font:700 22px Georgia,serif;color:var(--g);margin:0}.week,.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.week div{text-align:center;padding:8px 2px;font-size:12px;font-weight:700;color:#6b6157}
+.day{min-height:105px;border:1px solid var(--line);border-radius:8px;padding:7px;background:#fff;cursor:pointer}.day.out{background:#faf8f4;color:#aaa}.day.selected{outline:2px solid var(--gold)}.num{font-weight:700}.event{margin-top:5px;padding:5px;border-left:4px solid var(--gold);background:#efe5d0;border-radius:5px;font-size:11px;line-height:1.25}.published{border-left-color:var(--g);background:#e5eee8}
+.private{display:none;min-height:calc(100vh - 82px)}.private.on{display:grid;grid-template-columns:220px 1fr}aside{background:#203b2f;padding:15px 11px}.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;color:#eee;text-align:left;padding:11px;border-radius:8px;cursor:pointer}.nav button.active,.nav button:hover{background:#365b49}
+main{padding:24px;max-width:1220px;width:100%}.view{display:none}.view.active{display:block}h2{font:700 28px Georgia,serif;color:var(--g);margin:0 0 16px}h3{color:var(--g)}
+input,textarea,select{width:100%;border:1px solid #cfc5b7;border-radius:8px;padding:10px;margin:5px 0 11px;background:#fff}.actions{display:flex;gap:7px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:11px;overflow:hidden}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#eee8dc;color:var(--g);font-size:13px}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#ece2cf;font-size:11px}.big-number{font-size:52px!important;line-height:1;font-weight:800;margin:18px 0 6px!important;color:var(--g)!important}
+.two{display:grid;grid-template-columns:.85fr 1.15fr;gap:15px;align-items:start}.mini .day{min-height:54px;padding:5px}.mini .event{font-size:9px;padding:3px}.login{display:none;position:fixed;inset:0;background:#0008;z-index:60;align-items:center;justify-content:center;padding:18px}.login.on{display:flex}.loginbox{width:min(410px,100%);background:#fff;border-radius:16px;padding:22px}
+.toast{position:fixed;right:18px;bottom:18px;background:#173b2d;color:#fff;padding:11px 15px;border-radius:9px;z-index:90;opacity:0;pointer-events:none;transition:.2s}.toast.on{opacity:1}.msg{font-size:13px;color:#356246;margin-top:7px}
+@media(max-width:850px){.stats,.grid3,.two{grid-template-columns:1fr}.private.on{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,1fr)}.day{min-height:75px;padding:4px}.public,main{padding:13px}.brand h1{font-size:24px}}
 </style>
-</head>
-<body>
-<header><div class="head"><div class="brand"><small>PODCAST · TUPBI</small><h1>Vozes Ancestrais</h1><div class="tag">“Quando a ancestralidade fala, o espírito reconhece o caminho.”</div></div><button class="btn gold" id="loginBtn">Login</button></div></header>
-<main class="public" id="public">
+</head><body>
+<header><div class="head"><div class="brand"><small>PODCAST · TUPBI</small><h1>Vozes Ancestrais</h1><div style="color:#ead7a9;font:italic 14px Georgia,serif;margin-top:3px">“Quando a ancestralidade fala, o espírito reconhece o caminho.”</div></div><div><span id="who" style="display:none"></span><button class="btn gold" id="loginBtn">Login</button></div></div></header>
+
+<section class="public" id="public">
 <div class="cover"><div><h2>Vozes Ancestrais</h2><p>Calendário público, próximos episódios e publicações do canal oficial.</p></div></div>
-<div class="stats">
-<div class="card"><b>Próximo agendamento</b><h3>Nenhum agendamento</h3></div>
-<div class="card"><b>Último publicado no YouTube</b><h3>EP 04 — O Próximo Passo: Tira-Dúvidas e Previsões (Ao Vivo)</h3></div>
-<div class="card"><b>Episódios publicados</b><div class="big">4</div></div>
+<h2 class="section-title">Central do podcast</h2><div class="stats">
+<div class="card"><b>Próximo agendamento</b><h3 id="nextPublic">—</h3></div>
+<div class="card"><b>Último publicado no YouTube</b><h3 id="lastYoutube">—</h3><button class="btn ghost" id="channelBtn">Canal oficial</button></div>
+<div class="card"><b>Episódios publicados</b><h3 id="publishedCount" class="big-number">0</h3></div></div>
+<h2 class="section-title">Calendário</h2>
+<div class="calbox"><div class="calhead"><div class="actions"><button class="btn ghost" id="pubPrev">‹</button><button class="btn ghost" id="pubToday">Hoje</button></div><h3 id="pubMonth"></h3><button class="btn ghost" id="pubNext">›</button></div><div class="week"><div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div></div><div class="calendar" id="pubCal"></div></div>
+<h2 class="section-title">Sugira um tema</h2><div class="card"><input id="publicSuggestion" placeholder="Qual tema você gostaria de ouvir?"><button class="btn primary" id="suggestBtn">Enviar sugestão</button><div class="msg" id="suggestMsg"></div></div>
+</section>
+
+<section class="private" id="private">
+<aside><div class="nav" id="nav">
+<button class="active" data-view="home">Visão geral</button><button data-view="program">Programação</button><button data-view="episodes">Episódios</button><button data-view="pauta">Pautas</button><button data-view="themes">Banco de Temas</button><button data-view="youtube">Central YouTube</button><button data-view="team">Equipe</button><button data-view="settings" data-admin>Configurações</button>
+</div></aside>
+<main>
+<section class="view active" id="home"><h2>Visão geral</h2><div class="grid3"><div class="card"><b>Próximo episódio</b><h3 id="homeNext">—</h3></div><div class="card"><b>Programados</b><h3 id="homeScheduled" class="big-number">0</h3></div><div class="card"><b>Publicados</b><h3 id="homePublished" class="big-number">0</h3></div></div></section>
+
+<section class="view" id="program"><h2>Programação</h2><div class="two">
+<div class="card mini"><div class="calhead"><button class="btn ghost" id="miniPrev">‹</button><h3 id="miniMonth"></h3><button class="btn ghost" id="miniNext">›</button></div><div class="week"><div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div></div><div class="calendar" id="miniCal"></div><p style="font-size:12px;color:var(--muted)">Clique no dia para iniciar o cadastro.</p></div>
+<div class="card"><h3>Cadastrar / editar episódio</h3><input type="hidden" id="pId"><label>Data</label><input type="date" id="pDate"><label>Número do episódio</label><input id="pEp"><label>Tema / título</label><input id="pTitle"><label>Horário</label><input type="time" id="pTime"><label>Responsável</label><input id="pResponsible"><label>Convidado</label><input id="pGuest"><label>Observações internas</label><textarea id="pNotes" rows="3"></textarea><label><input type="checkbox" id="pPublic" style="width:auto;margin-right:7px" checked>Exibir no calendário público</label><div class="actions" style="margin-top:12px"><button class="btn primary" id="saveProgram">Salvar</button><button class="btn ghost" id="clearProgram">Limpar</button></div></div></div>
+<h3>Episódios programados</h3><table><thead><tr><th>Data</th><th>EP</th><th>Tema</th><th>Hora</th><th>Ações</th></tr></thead><tbody id="programRows"></tbody></table></section>
+
+<section class="view" id="episodes"><h2>Episódios</h2><table><thead><tr><th>EP</th><th>Título</th><th>Data</th><th>Status</th><th>Origem</th><th>Ações</th></tr></thead><tbody id="episodeRows"></tbody></table></section>
+
+<section class="view" id="pauta"><h2>Pautas</h2><div class="card"><h3>Roteirização por tempo</h3><label>Episódio da pauta</label><select id="pautaEpisode"></select><div id="pautaBlocks"></div><div class="actions"><button class="btn primary" id="savePauta">Salvar pauta</button><button class="btn ghost" id="printPauta">Imprimir / PDF</button></div></div></section>
+
+<section class="view" id="themes"><h2>Banco de Temas</h2><div class="card"><div class="actions"><input id="newTheme" placeholder="Novo tema" style="margin:0;flex:1"><button class="btn primary" id="addTheme">Adicionar tema</button></div></div><div id="themeCards" style="margin-top:13px"></div></section>
+
+<section class="view" id="youtube"><h2>Central YouTube</h2><div class="card"><h3>Canal oficial</h3><p>Vozes Ancestrais · @VozesAncestrais-y5d</p><p style="font-size:13px;color:var(--muted)">A central considera vídeos e transmissões ao vivo. Um episódio pode possuir várias partes sem aumentar a contagem de episódios.</p><div class="actions"><button class="btn primary" id="syncYoutube">Sincronizar informações</button><button class="btn ghost" id="openYoutube">Abrir canal</button></div><div class="msg" id="ytMsg"></div></div><h3>Publicações sincronizadas</h3><div id="youtubeCards"></div>
+<div class="card" style="margin-top:14px"><h3>Vincular vídeo / live a um episódio</h3>
+<label>Episódio</label><select id="ytEpisode"></select>
+<label>Parte</label><input id="ytPart" type="number" min="1" value="1">
+<label>Título da parte</label><input id="ytPartTitle" placeholder="Ex.: EP 04 — Parte 1">
+<label>Link do YouTube</label><input id="ytPartUrl" placeholder="https://www.youtube.com/watch?v=...">
+<div class="actions"><button class="btn primary" id="addYtPart">Adicionar / atualizar parte</button><button class="btn ghost" id="clearYtPart">Limpar</button></div>
+<div class="msg" id="ytPartMsg"></div></div></section>
+
+<section class="view" id="team"><h2>Equipe</h2><div id="teamPublic" class="grid3"></div><div class="card" id="adminUsers" style="margin-top:15px"><h3>Gerenciamento de logins</h3><button class="btn primary" id="addUser">+ Adicionar integrante / login</button>
+<div id="newUserForm" class="card" style="display:none;margin-top:12px">
+  <h3>Novo integrante / login</h3>
+  <label>Nome</label><input id="newUserName" placeholder="Nome do integrante">
+  <label>Login</label><input id="newUserLogin" placeholder="Login de acesso">
+  <label>Função</label>
+  <select id="newUserRole">
+    <option>Apresentador</option>
+    <option>Organizador</option>
+    <option>Sacerdotisa</option>
+  </select>
+  <label>Senha inicial</label><input id="newUserPassword" type="password" placeholder="Senha inicial">
+  <div class="actions">
+    <button class="btn primary" id="saveNewUser">Criar integrante / login</button>
+    <button class="btn ghost" id="cancelNewUser">Cancelar</button>
+  </div>
+  <div class="msg" id="newUserMsg"></div>
 </div>
-<div class="card episodes"><h2>Publicados</h2>
-<div class="ep"><b>EP 01 — Introdução</b> · 01/03/2026</div>
-<div class="ep"><b>EP 02 — Desenvolvendo Nossa Ancestralidade</b> · 18/03/2026</div>
-<div class="ep"><b>EP 03 — Moral, Ética e Espiritualidade</b> · 12/04/2026</div>
-<div class="ep"><b>EP 04 — O Próximo Passo: Tira-Dúvidas e Previsões (Ao Vivo)</b> · 3 partes · datas exatas a sincronizar</div>
-</div>
-</main>
-<main class="private" id="private"><div class="card"><h2>Painel interno</h2><p class="ok"><b>Login realizado com sucesso.</b></p><p id="who"></p><p>Esta publicação online é a etapa de validação do login Supabase. Após a confirmação, o dashboard completo será conectado aos dados compartilhados.</p><button class="btn ghost" id="logout">Sair</button></div></main>
-<div class="login" id="modal"><div class="box"><h2>Login</h2><label>Login</label><input id="username" autocomplete="username" value="PANDA"><label>Senha</label><input id="password" type="password" autocomplete="current-password"><div><button class="btn primary" id="enter">Entrar</button> <button class="btn ghost" id="cancel">Cancelar</button></div><div class="msg" id="msg"></div></div></div>
+<div id="userRows"></div></div></section>
+
+<section class="view" id="settings"><h2>Configurações</h2><div class="card"><h3>Administração</h3><p>Área exclusiva do Administrador. A sincronização real em nuvem será feita pelo Supabase.</p><button class="btn ghost" id="backupBtn">Exportar backup dos dados</button></div></section>
+</main></section>
+
+<div class="login" id="login"><div class="loginbox"><button id="closeLogin" style="float:right;border:0;background:none;font-size:22px;cursor:pointer">×</button><h2>Login</h2><label>Login</label><input id="loginUser"><label>Senha</label><input id="loginPass" type="password"><button class="btn primary" id="enterBtn">Entrar</button><div class="msg" id="loginMsg"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const URL='https://pmoczuauonmpfqacvkon.supabase.co';
-const KEY='sb_publishable_RUcZihQgDqMs7SGC7ZOL9Q_sDzYsbAe';
-const $=s=>document.querySelector(s);
-$('#loginBtn').onclick=()=>{$('#modal').classList.add('on');$('#msg').textContent='';$('#password').focus()};
-$('#cancel').onclick=()=>$('#modal').classList.remove('on');
-$('#enter').onclick=async()=>{
- const username=$('#username').value.trim(),password=$('#password').value;
- if(!username||!password){$('#msg').textContent='Informe o login e a senha.';return}
- $('#msg').textContent='Conectando...';$('#enter').disabled=true;
- try{
-  const r=await fetch(URL+'/functions/v1/login-username',{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY},body:JSON.stringify({username,password})});
-  const data=await r.json().catch(()=>({}));
-  if(!r.ok||!data.success){$('#msg').textContent=(r.status===401?'Login ou senha incorretos.':(data.error||'Não foi possível realizar o login.'));return}
-  sessionStorage.setItem('va_access_token',data.session?.access_token||'');
-  sessionStorage.setItem('va_refresh_token',data.session?.refresh_token||'');
-  $('#who').textContent='Usuário: '+(data.user?.username||username)+' · Perfil: '+(data.user?.role||'');
-  $('#modal').classList.remove('on');$('#public').classList.add('off');$('#private').classList.add('on');$('#loginBtn').style.display='none';
- }catch(e){$('#msg').textContent='Não foi possível conectar ao sistema.'}
- finally{$('#enter').disabled=false}
+document.addEventListener('DOMContentLoaded',()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const SUPABASE_URL='https://pmoczuauonmpfqacvkon.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_RUcZihQgDqMs7SGC7ZOL9Q_sDzYsbAe';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const uid=()=>Date.now()+Math.floor(Math.random()*10000);
+const isoToday=()=>new Date().toISOString().slice(0,10);
+const seed={
+programming:[],
+episodes:[
+{id:1,ep:'01',title:'Introdução',date:'2026-03-01',status:'Publicado',source:'YouTube',youtube:'https://www.youtube.com/watch?v=jkQgjB3tjbI&t=212s',duration:'00:39:29'},
+{id:2,ep:'02',title:'Desenvolvendo Nossa Ancestralidade',date:'2026-03-18',status:'Publicado',source:'YouTube',youtube:'https://www.youtube.com/watch?v=OVrNa107Q2k&t=199s',duration:'00:38:45'},
+{id:3,ep:'03',title:'Moral, Ética e Espiritualidade',date:'2026-04-12',status:'Publicado',source:'YouTube',youtube:'https://www.youtube.com/watch?v=MDz_suj5K4k&t=218s',duration:'01:31:14'},
+{id:4,ep:'04',title:'O Próximo Passo: Tira-Dúvidas e Previsões (Ao Vivo)',date:'',status:'Publicado',source:'YouTube / Ao vivo',youtube:'',duration:'',parts:[
+ {id:401,part:1,title:'EP 04 — Parte 1',youtube:''},
+ {id:402,part:2,title:'EP 04 — Parte 2',youtube:''},
+ {id:403,part:3,title:'EP 04 — Parte 3',youtube:''}
+]}],
+themes:['Antepassados vs. Ancestrais','O Sincretismo Religioso','Saúde Mental nos Terreiros','O que é Demanda?','Imersão de Baralho Cigano e Tarô','O Papel do Sacerdote e do Médium','Episódio Específico sobre Incorporação','Diferença entre Exu, Catiço e outras Entidades','O Verdadeiro Sentido da Caridade','Umbanda, Quimbanda e as Linhas de Esquerda','As Eras Espirituais','Os Tipos de Mediunidade','Jesus Cristo na Visão Umbandista','Lidando com o Ego na Corrente','A Definir'].map((title,i)=>({id:200+i,title,source:'Interno'})),
+suggestions:[],users:[{id:1,name:'Administrador',login:'PANDA',role:'Administrador',active:true,protected:true}],pautas:{}
 };
-$('#logout').onclick=()=>{sessionStorage.removeItem('va_access_token');sessionStorage.removeItem('va_refresh_token');$('#private').classList.remove('on');$('#public').classList.remove('off');$('#loginBtn').style.display='inline-block';$('#password').value=''};
-</script>
-</body></html>
+let state=JSON.parse(localStorage.getItem('va_v7_state')||'null')||seed;
+// Corrige o dado provisório incorreto da V14: EP 04 não pode ter publicação futura em 10/10/2026.
+state.programming=state.programming.filter(p=>!(String(p.ep).replace(/^0+/,'')==='4' && p.date==='2026-10-10' && p.title.includes('O Próximo Passo')));
+state.episodes.forEach(e=>{if(String(e.ep).replace(/^0+/,'')==='4' && e.date==='2026-10-10' && e.title.includes('O Próximo Passo')) e.date='';});
+// Garante os 4 episódios oficiais conhecidos sem apagar dados já salvos.
+seed.episodes.forEach(k=>{
+  const i=state.episodes.findIndex(x=>String(x.ep).replace(/^0+/,'')===String(k.ep).replace(/^0+/,''));
+  if(i<0) state.episodes.push(JSON.parse(JSON.stringify(k)));
+  else if(String(k.ep).replace(/^0+/,'')==='4'){
+    state.episodes[i]={...state.episodes[i],title:k.title,status:'Publicado',source:k.source,date:'',parts:state.episodes[i].parts?.length?state.episodes[i].parts:JSON.parse(JSON.stringify(k.parts))};
+  }
+});
+localStorage.setItem('va_v7_state',JSON.stringify(state));
+const fmtDate=d=>d?d.split('-').reverse().join('/'):'Data a confirmar';
+let auth=false,admin=false,pubCursor=new Date(2026,8,1),miniCursor=new Date(2026,8,1);
+const save=()=>{localStorage.setItem('va_v7_state',JSON.stringify(state));renderAll()};
+function toast(t){$('#toast').textContent=t;$('#toast').classList.add('on');setTimeout(()=>$('#toast').classList.remove('on'),1800)}
+function allCalendarEvents(){
+ return [
+ ...state.programming.filter(x=>x.public).map(x=>({date:x.date,label:`${x.time} · EP ${x.ep}`,title:x.title,type:'scheduled'})),
+ ...state.episodes.filter(x=>x.status==='Publicado').map(x=>({date:x.date,label:`EP ${x.ep} · Publicado`,title:x.title,type:'published'}))
+ ];
+}
+function calendar(el,titleEl,cursor,mini=false){
+ titleEl.textContent=`${months[cursor.getMonth()]} ${cursor.getFullYear()}`;el.innerHTML='';
+ const first=new Date(cursor.getFullYear(),cursor.getMonth(),1),start=new Date(first);start.setDate(1-first.getDay());
+ const events=allCalendarEvents();
+ for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+ const c=document.createElement('div');c.className='day'+(d.getMonth()!=cursor.getMonth()?' out':'');c.dataset.date=iso;c.innerHTML=`<span class="num">${d.getDate()}</span>`;
+ events.filter(x=>x.date===iso).forEach(x=>{const e=document.createElement('div');e.className='event '+(x.type==='published'?'published':'');e.innerHTML=`<b>${esc(x.label)}</b><br>${esc(x.title)}`;c.appendChild(e)});el.appendChild(c)}
+}
+function nextScheduled(){return state.programming.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))[0]}
+function renderStats(){const n=nextScheduled(),published=state.episodes.filter(x=>x.status==='Publicado');const lastPublished=[...published].sort((a,b)=>{const ea=Number(String(a.ep).replace(/\D/g,''))||0,eb=Number(String(b.ep).replace(/\D/g,''))||0;return eb-ea})[0];$('#nextPublic').textContent=n?`EP ${n.ep} — ${n.title} · ${fmtDate(n.date)} ${n.time}`:'Nenhum agendamento';$('#lastYoutube').textContent=lastPublished?`EP ${lastPublished.ep} — ${lastPublished.title}`:'—';$('#publishedCount').textContent=published.length;$('#homeNext').textContent=n?`EP ${n.ep} — ${n.title}`:'—';$('#homeScheduled').textContent=state.programming.length;$('#homePublished').textContent=published.length}
+function renderPrograms(){$('#programRows').innerHTML=state.programming.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(p=>`<tr><td>${fmtDate(p.date)}</td><td>${esc(p.ep)}</td><td>${esc(p.title)}</td><td>${esc(p.time)}</td><td class="actions"><button class="btn primary editProg" data-id="${p.id}">Editar</button><button class="btn gold registerProg" data-id="${p.id}">Cadastrar episódio</button><button class="btn danger deleteProg" data-id="${p.id}">Excluir</button></td></tr>`).join('')}
+function renderEpisodes(){
+ $('#episodeRows').innerHTML=state.episodes.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(e=>{
+   const parts=(e.parts||[]).length;
+   return `<tr><td>${esc(e.ep)}</td><td>${esc(e.title)}${parts?`<br><span class="badge">${parts} partes</span>`:''}</td><td>${fmtDate(e.date)}</td><td>${esc(e.status)}</td><td>${esc(e.source)}</td><td class="actions"><button class="btn primary editEpisode" data-id="${e.id}">Editar</button><button class="btn danger deleteEpisode" data-id="${e.id}">Excluir</button>${e.youtube?`<button class="btn ghost openEpisode" data-id="${e.id}">YouTube</button>`:''}</td></tr>`
+ }).join('')
+}
+function renderThemes(){const suggestions=state.suggestions.map(s=>({id:s.id,title:s.text,source:'Sugestão do público'}));$('#themeCards').innerHTML=[...suggestions,...state.themes].map(t=>`<div class="card" style="margin-bottom:9px"><span class="badge">${esc(t.source)}</span><h3>${esc(t.title)}</h3><div class="actions"><button class="btn primary selectTheme" data-id="${t.id}" data-source="${esc(t.source)}">Selecionar para programação</button><button class="btn danger deleteTheme" data-id="${t.id}" data-source="${esc(t.source)}">Excluir</button></div></div>`).join('')}
+function renderYoutube(){
+ const eps=state.episodes.filter(x=>String(x.source).includes('YouTube'));
+ $('#youtubeCards').innerHTML=eps.map(e=>{
+   const parts=e.parts||[];
+   const main=e.youtube?`<button class="btn ghost ytOpen" data-id="${e.id}">Abrir vídeo</button>`:'';
+   const partHtml=parts.length?`<div style="margin-top:10px">${parts.map(p=>`<div class="card" style="margin:7px 0;padding:10px"><b>Parte ${p.part}</b> — ${esc(p.title||'')}<div class="actions" style="margin-top:7px">${p.youtube?`<button class="btn ghost ytPartOpen" data-ep="${e.id}" data-part="${p.part}">Abrir no YouTube</button>`:`<span class="badge">Link ainda não vinculado</span>`}<button class="btn primary ytPartEdit" data-ep="${e.id}" data-part="${p.part}">Editar vínculo</button><button class="btn danger ytPartDelete" data-ep="${e.id}" data-part="${p.part}">Remover parte</button></div></div>`).join('')}</div>`:'';
+   return `<div class="card" style="margin-bottom:9px"><span class="badge">EP ${esc(e.ep)}</span><h3>${esc(e.title)}</h3><p>${fmtDate(e.date)} · ${esc(e.duration||'')}${parts?` · ${parts.length} partes`:''}</p>${main}${partHtml}</div>`
+ }).join('');
+ $('#ytEpisode').innerHTML=state.episodes.map(e=>`<option value="${e.id}">EP ${esc(e.ep)} — ${esc(e.title)}</option>`).join('');
+}
+function renderUsers(){$('#teamPublic').innerHTML=state.users.map(u=>`<div class="card"><h3>${esc(u.name)}</h3><span class="badge">${esc(u.role)}</span><p>${u.active?'Acesso ativo':'Acesso desativado'}</p></div>`).join('');$('#userRows').innerHTML=state.users.map(u=>`<div class="card" style="margin-top:9px"><b>${esc(u.name)}</b> · ${esc(u.login)}<div class="actions" style="margin-top:8px">${u.protected?'Conta administrativa protegida':`<button class="btn primary userEdit" data-id="${u.id}">Editar</button><button class="btn ghost userReset" data-id="${u.id}">Resetar senha</button><button class="btn ghost userToggle" data-id="${u.id}">${u.active?'Desativar':'Ativar'}</button><button class="btn danger userDelete" data-id="${u.id}">Remover</button>`}</div></div>`).join('')}
+function pautaBlocks(){
+ const ranges=['00:00–00:20','00:20–00:40','00:40–01:00','01:00–01:20','01:20–01:30'];
+ const key=$('#pautaEpisode').value||'geral',data=state.pautas[key]||ranges.map((tempo,i)=>({tempo,assunto:i===0?'Abertura e introdução':i===4?'Encerramento':'',participantes:'',perguntas:'',obs:''}));
+ $('#pautaBlocks').innerHTML=data.map((b,i)=>`<div class="card pautaBlock" data-i="${i}" style="margin:10px 0"><h3>${b.tempo}</h3><label>Assunto / ponto</label><input class="assunto" value="${esc(b.assunto)}"><label>Quem participa</label><input class="participantes" value="${esc(b.participantes)}"><label>Perguntas norteadoras — máximo 5</label><textarea class="perguntas" rows="4">${esc(b.perguntas)}</textarea><label>Observações para a equipe</label><textarea class="obs" rows="2">${esc(b.obs)}</textarea></div>`).join('')
+}
+function renderPautaSelect(){const opts=[...state.programming.map(x=>({v:'p'+x.id,t:`Programado: EP ${x.ep} — ${x.title}`})),...state.episodes.map(x=>({v:'e'+x.id,t:`EP ${x.ep} — ${x.title}`}))];const old=$('#pautaEpisode').value;$('#pautaEpisode').innerHTML=opts.map(x=>`<option value="${x.v}">${esc(x.t)}</option>`).join('');if(opts.some(x=>x.v===old))$('#pautaEpisode').value=old;pautaBlocks()}
+function renderAll(){calendar($('#pubCal'),$('#pubMonth'),pubCursor);calendar($('#miniCal'),$('#miniMonth'),miniCursor,true);renderStats();renderPrograms();renderEpisodes();renderThemes();renderYoutube();renderUsers();renderPautaSelect();$$('[data-admin]').forEach(x=>x.style.display=admin?'block':'none');$('#adminUsers').style.display=admin?'block':'none'}
+function clearProgram(date=''){['#pId','#pEp','#pTitle','#pTime','#pResponsible','#pGuest','#pNotes'].forEach(s=>$(s).value='');$('#pDate').value=date;$('#pPublic').checked=true}
+function fillProgram(p){$('#pId').value=p.id;$('#pDate').value=p.date;$('#pEp').value=p.ep;$('#pTitle').value=p.title;$('#pTime').value=p.time;$('#pResponsible').value=p.responsible||'';$('#pGuest').value=p.guest||'';$('#pNotes').value=p.notes||'';$('#pPublic').checked=!!p.public}
+function pautaData(){return $$('.pautaBlock').map(b=>({tempo:b.querySelector('h3').textContent,assunto:b.querySelector('.assunto').value,participantes:b.querySelector('.participantes').value,perguntas:b.querySelector('.perguntas').value,obs:b.querySelector('.obs').value}))}
+
+// navegação/login
+async function applyAuthenticatedUI(profile){
+ auth=true;admin=profile?.role==='admin';
+ $('#login').classList.remove('on');$('#public').classList.add('hidden');$('#private').classList.add('on');
+ $('#who').style.display='inline';$('#who').textContent=admin?'Administrador':'Membro';$('#loginBtn').textContent='Sair';$('#loginMsg').textContent='';renderAll();
+}
+async function applyPublicUI(){
+ auth=false;admin=false;$('#private').classList.remove('on');$('#public').classList.remove('hidden');
+ $('#who').style.display='none';$('#who').textContent='';$('#loginBtn').textContent='Login';renderAll();
+}
+async function loadProfile(userId){
+ const {data,error}=await supabaseClient.from('profiles').select('user_id,username,display_name,role,active').eq('user_id',userId).single();
+ if(error||!data||!data.active) throw new Error('Perfil não encontrado ou desativado.');
+ return data;
+}
+$('#loginBtn').onclick=async()=>{if(auth){await supabaseClient.auth.signOut();await applyPublicUI()}else $('#login').classList.add('on')};
+$('#closeLogin').onclick=()=>$('#login').classList.remove('on');
+$('#enterBtn').onclick=async()=>{
+ const login=$('#loginUser').value.trim(),pass=$('#loginPass').value;
+ if(!login||!pass){$('#loginMsg').textContent='Informe login e senha.';return}
+ $('#enterBtn').disabled=true;$('#loginMsg').textContent='Entrando...';
+ try{
+   const response=await fetch(SUPABASE_URL+'/functions/v1/login-username',{
+     method:'POST',
+     headers:{
+       'apikey':SUPABASE_PUBLISHABLE_KEY,
+       'Content-Type':'application/json'
+     },
+     body:JSON.stringify({username:login,password:pass})
+   });
+   let data=null;
+   try{data=await response.json()}catch(_){ }
+   if(!response.ok){
+     const e=new Error(data?.error||'Falha ao acessar o serviço de login.');
+     e.status=response.status;
+     throw e;
+   }
+   if(!data?.success||!data?.session?.access_token||!data?.session?.refresh_token){
+     throw new Error(data?.error||'Resposta inválida do serviço de login.');
+   }
+   // A Edge Function validou a senha. Agora registramos a sessão no cliente Supabase
+   // para que as próximas operações respeitem Auth e as políticas RLS.
+   const {error:sessionError}=await supabaseClient.auth.setSession({
+     access_token:data.session.access_token,
+     refresh_token:data.session.refresh_token
+   });
+   if(sessionError) throw sessionError;
+   sessionStorage.setItem('va_access_token',data.session.access_token);
+   sessionStorage.setItem('va_refresh_token',data.session.refresh_token);
+   const profile={
+     user_id:data.user.id,
+     username:data.user.username,
+     display_name:data.user.username,
+     role:data.user.role,
+     active:true
+   };
+   await applyAuthenticatedUI(profile);
+   $('#loginPass').value='';
+   $('#loginMsg').textContent='';
+ }catch(err){
+   console.error('LOGIN_ERROR',err);
+   const status=err?.status;
+   const message=String(err?.message||'');
+   if(status===401||status===403||/senha|password|credential|login não encontrado|desativado/i.test(message)){
+     $('#loginMsg').textContent='Login ou senha incorretos.';
+   }else{
+     $('#loginMsg').textContent='Não foi possível conectar ao sistema. Tente novamente.';
+   }
+ }finally{$('#enterBtn').disabled=false}
+};
+(async()=>{
+ const {data:{session}}=await supabaseClient.auth.getSession();
+ if(session?.user){try{await applyAuthenticatedUI(await loadProfile(session.user.id))}catch(e){await supabaseClient.auth.signOut();await applyPublicUI()}}
+})();
+$('#nav').onclick=e=>{const b=e.target.closest('[data-view]');if(!b)return;$$('.view').forEach(v=>v.classList.toggle('active',v.id===b.dataset.view));$$('#nav button').forEach(x=>x.classList.toggle('active',x===b))};
+
+// calendários
+$('#pubPrev').onclick=()=>{pubCursor=new Date(pubCursor.getFullYear(),pubCursor.getMonth()-1,1);renderAll()};$('#pubNext').onclick=()=>{pubCursor=new Date(pubCursor.getFullYear(),pubCursor.getMonth()+1,1);renderAll()};$('#pubToday').onclick=()=>{const d=new Date();pubCursor=new Date(d.getFullYear(),d.getMonth(),1);renderAll()};
+$('#miniPrev').onclick=()=>{miniCursor=new Date(miniCursor.getFullYear(),miniCursor.getMonth()-1,1);renderAll()};$('#miniNext').onclick=()=>{miniCursor=new Date(miniCursor.getFullYear(),miniCursor.getMonth()+1,1);renderAll()};
+$('#miniCal').onclick=e=>{const d=e.target.closest('.day');if(!d)return;const p=state.programming.find(x=>x.date===d.dataset.date);p?fillProgram(p):clearProgram(d.dataset.date)};
+
+// programação
+$('#saveProgram').onclick=()=>{const p={id:Number($('#pId').value)||uid(),date:$('#pDate').value,ep:$('#pEp').value.trim(),title:$('#pTitle').value.trim(),time:$('#pTime').value,responsible:$('#pResponsible').value.trim(),guest:$('#pGuest').value.trim(),notes:$('#pNotes').value.trim(),public:$('#pPublic').checked};if(!p.date||!p.ep||!p.title||!p.time){toast('Preencha data, EP, tema e horário.');return}const i=state.programming.findIndex(x=>x.id===p.id);i>=0?state.programming[i]=p:state.programming.push(p);clearProgram();save();toast(i>=0?'Programação atualizada.':'Episódio programado.')};
+$('#clearProgram').onclick=()=>clearProgram();
+$('#programRows').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=Number(b.dataset.id),p=state.programming.find(x=>x.id===id);if(!p)return;if(b.classList.contains('editProg'))fillProgram(p);if(b.classList.contains('deleteProg')){state.programming=state.programming.filter(x=>x.id!==id);save();toast('Agendamento excluído.');}if(b.classList.contains('registerProg')){if(!state.episodes.some(x=>x.ep===p.ep&&x.title===p.title))state.episodes.push({id:uid(),ep:p.ep,title:p.title,date:p.date,status:'Cadastrado',source:'Programação',youtube:'',duration:''});save();toast('Episódio cadastrado e sincronizado com Episódios e Calendário.')}};
+
+// episódios
+$('#episodeRows').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=Number(b.dataset.id),ep=state.episodes.find(x=>x.id===id);if(!ep)return;if(b.classList.contains('openEpisode')&&ep.youtube)window.open(ep.youtube,'_blank');if(b.classList.contains('deleteEpisode')){state.episodes=state.episodes.filter(x=>x.id!==id);save();toast('Episódio excluído.');}if(b.classList.contains('editEpisode')){const t=prompt('Título:',ep.title);if(t===null)return;const d=prompt('Data (AAAA-MM-DD):',ep.date);if(d===null)return;ep.title=t.trim()||ep.title;ep.date=d.trim()||ep.date;save();toast('Episódio atualizado.')}};
+
+// temas
+$('#suggestBtn').onclick=()=>{const t=$('#publicSuggestion').value.trim();if(!t){$('#suggestMsg').textContent='Digite uma sugestão.';return}state.suggestions.push({id:uid(),text:t});$('#publicSuggestion').value='';$('#suggestMsg').textContent='Sugestão enviada.';save()};
+$('#addTheme').onclick=()=>{const t=$('#newTheme').value.trim();if(!t)return;state.themes.push({id:uid(),title:t,source:'Interno'});$('#newTheme').value='';save();toast('Tema adicionado.')};
+$('#themeCards').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=Number(b.dataset.id),source=b.dataset.source;let obj=source==='Sugestão do público'?state.suggestions.find(x=>x.id===id):state.themes.find(x=>x.id===id);if(!obj)return;const title=obj.title||obj.text;if(b.classList.contains('selectTheme')){clearProgram();$('#pTitle').value=title;$$('.view').forEach(v=>v.classList.toggle('active',v.id==='program'));$$('#nav button').forEach(x=>x.classList.toggle('active',x.dataset.view==='program'));toast('Tema levado para Programação.')}if(b.classList.contains('deleteTheme')){if(source==='Sugestão do público')state.suggestions=state.suggestions.filter(x=>x.id!==id);else state.themes=state.themes.filter(x=>x.id!==id);save();toast('Tema excluído.');}};
+
+// YouTube
+const official='https://www.youtube.com/@VozesAncestrais-y5d/videos';$('#channelBtn').onclick=$('#openYoutube').onclick=()=>window.open(official,'_blank');
+
+$('#syncYoutube').onclick=()=>{
+ const known=seed.episodes;
+ known.forEach(k=>{
+   const i=state.episodes.findIndex(x=>x.ep===k.ep);
+   if(i>=0){
+     const current=state.episodes[i], merged={...current,...k};
+     if(current.parts?.length) merged.parts=current.parts;
+     state.episodes[i]=merged;
+   } else state.episodes.push(JSON.parse(JSON.stringify(k)));
+ });
+ save();
+ $('#ytMsg').textContent='Central local reconciliada com os registros conhecidos, incluindo o EP 04 com 3 partes. Para buscar automaticamente novos vídeos e lives do canal, ainda é necessária a API do YouTube.';
+ toast('Registros locais sincronizados.');
+};
+function clearYtPart(){ $('#ytPart').value='1';$('#ytPartTitle').value='';$('#ytPartUrl').value='';$('#ytPartMsg').textContent='';}
+$('#clearYtPart').onclick=clearYtPart;
+$('#addYtPart').onclick=()=>{
+ const ep=state.episodes.find(x=>x.id===Number($('#ytEpisode').value));
+ const part=Number($('#ytPart').value), title=$('#ytPartTitle').value.trim(), url=$('#ytPartUrl').value.trim();
+ if(!ep||!part||!title){$('#ytPartMsg').textContent='Informe episódio, número da parte e título.';return}
+ if(url && !/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test(url)){ $('#ytPartMsg').textContent='Informe um link válido do YouTube.';return }
+ ep.parts=ep.parts||[]; const i=ep.parts.findIndex(x=>x.part===part);
+ const obj={id:i>=0?ep.parts[i].id:uid(),part,title,youtube:url};
+ if(i>=0)ep.parts[i]=obj;else ep.parts.push(obj);
+ ep.parts.sort((a,b)=>a.part-b.part); ep.source='YouTube / Ao vivo';
+ save();clearYtPart();toast('Parte vinculada ao episódio.');
+};
+$('#youtubeCards').onclick=e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.classList.contains('ytOpen')){const ep=state.episodes.find(x=>x.id===Number(b.dataset.id));if(ep?.youtube)window.open(ep.youtube,'_blank');return}
+ const ep=state.episodes.find(x=>x.id===Number(b.dataset.ep));if(!ep)return;
+ const p=(ep.parts||[]).find(x=>x.part===Number(b.dataset.part));if(!p)return;
+ if(b.classList.contains('ytPartOpen')&&p.youtube)window.open(p.youtube,'_blank');
+ if(b.classList.contains('ytPartEdit')){$('#ytEpisode').value=ep.id;$('#ytPart').value=p.part;$('#ytPartTitle').value=p.title||'';$('#ytPartUrl').value=p.youtube||'';$('#ytPartMsg').textContent='Edite os dados e clique em Adicionar / atualizar parte.';}
+ if(b.classList.contains('ytPartDelete')){ep.parts=ep.parts.filter(x=>x.id!==p.id);save();toast('Parte removida.');}
+};
+
+// pauta
+$('#pautaEpisode').onchange=pautaBlocks;$('#savePauta').onclick=()=>{state.pautas[$('#pautaEpisode').value||'geral']=pautaData();localStorage.setItem('va_v7_state',JSON.stringify(state));toast('Pauta salva.')};
+$('#printPauta').onclick=()=>{const data=pautaData(),sel=$('#pautaEpisode').selectedOptions[0]?.textContent||'Pauta';const w=window.open('','_blank','width=950,height=720');if(!w){alert('Permita pop-ups para imprimir ou salvar em PDF.');return}w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Pauta</title><style>@page{size:A4;margin:12mm}body{font-family:Arial;color:#222}h1{font-family:Georgia;color:#173b2d;border-bottom:3px solid #c8a45d;padding-bottom:8px}.b{border:1px solid #ccc;border-radius:8px;padding:9px;margin:8px 0;page-break-inside:avoid}.t{font-weight:bold;color:#173b2d;font-size:18px}p{white-space:pre-wrap;margin:3px 0 8px;font-size:12px}</style></head><body><h1>Vozes Ancestrais — Pauta</h1><h3>${esc(sel)}</h3>${data.map(x=>`<div class="b"><div class="t">${esc(x.tempo)}</div><b>Assunto / ponto</b><p>${esc(x.assunto)||'—'}</p><b>Quem participa</b><p>${esc(x.participantes)||'—'}</p><b>Perguntas norteadoras</b><p>${esc(x.perguntas)||'—'}</p><b>Observações</b><p>${esc(x.obs)||'—'}</p></div>`).join('')}<script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);w.document.close()};
+
+// equipe/admin
+$('#addUser').onclick=()=>{
+ if(!admin){toast('Somente o Administrador pode criar logins.');return}
+ $('#newUserForm').style.display='block';
+ $('#newUserName').focus();
+};
+$('#cancelNewUser').onclick=()=>{
+ $('#newUserForm').style.display='none';
+ $('#newUserMsg').textContent='';
+};
+$('#saveNewUser').onclick=()=>{
+ if(!admin){toast('Somente o Administrador pode criar logins.');return}
+ const name=$('#newUserName').value.trim(), login=$('#newUserLogin').value.trim(),
+       role=$('#newUserRole').value, password=$('#newUserPassword').value;
+ if(!name||!login||!password){$('#newUserMsg').textContent='Preencha nome, login e senha inicial.';return}
+ if(state.users.some(u=>u.login.toLowerCase()===login.toLowerCase())){
+   $('#newUserMsg').textContent='Esse login já existe.';return;
+ }
+ // A senha é usada apenas nesta prévia local para permitir testar o novo acesso.
+ state.users.push({id:uid(),name,login,role,active:true,protected:false,password});
+ $('#newUserName').value='';$('#newUserLogin').value='';$('#newUserPassword').value='';
+ $('#newUserForm').style.display='none';$('#newUserMsg').textContent='';
+ save();toast('Integrante e login criados.');
+};
+$('#userRows').onclick=e=>{if(!admin)return;const b=e.target.closest('button');if(!b)return;const u=state.users.find(x=>x.id===Number(b.dataset.id));if(!u||u.protected)return;if(b.classList.contains('userEdit')){const n=prompt('Nome:',u.name);if(n===null)return;const l=prompt('Login:',u.login);if(l===null)return;const r=prompt('Função:',u.role);if(r===null)return;u.name=n;u.login=l;u.role=r;save();toast('Login atualizado.')}if(b.classList.contains('userReset'))toast('Redefinição solicitada. No sistema online será executada pelo Supabase Auth.');if(b.classList.contains('userToggle')){u.active=!u.active;save();toast(u.active?'Acesso ativado.':'Acesso desativado.')}if(b.classList.contains('userDelete')){state.users=state.users.filter(x=>x.id!==u.id);save();toast('Login removido.');}};
+$('#backupBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='vozes-ancestrais-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Backup exportado.')};
+
+renderAll();
+});
+</script></body></html>
