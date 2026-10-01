@@ -147,7 +147,7 @@ function calendar(el,titleEl,cursor,mini=false){
 }
 function nextScheduled(){return state.programming.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))[0]}
 function renderStats(){const n=nextScheduled(),published=state.episodes.filter(x=>x.status==='Publicado');const lastPublished=[...published].sort((a,b)=>{const ea=Number(String(a.ep).replace(/\D/g,''))||0,eb=Number(String(b.ep).replace(/\D/g,''))||0;return eb-ea})[0];$('#nextPublic').textContent=n?`EP ${n.ep} — ${n.title} · ${fmtDate(n.date)} ${n.time}`:'Nenhum agendamento';$('#lastYoutube').textContent=lastPublished?`EP ${lastPublished.ep} — ${lastPublished.title}`:'—';$('#publishedCount').textContent=published.length;$('#homeNext').textContent=n?`EP ${n.ep} — ${n.title}`:'—';$('#homeScheduled').textContent=state.programming.length;$('#homePublished').textContent=published.length}
-function renderPrograms(){$('#programRows').innerHTML=state.programming.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(p=>`<tr><td>${fmtDate(p.date)}</td><td>${esc(p.ep)}</td><td>${esc(p.title)}</td><td>${esc(p.time)}</td><td class="actions"><button class="btn primary editProg" data-id="${p.id}">Editar</button><button class="btn gold registerProg" data-id="${p.id}">Cadastrar episódio</button><button class="btn danger deleteProg" data-id="${p.id}">Excluir</button></td></tr>`).join('')}
+function renderPrograms(){$('#programRows').innerHTML=state.programming.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(p=>{const linked=episodeProgramLinks.has(String(p.id));return `<tr><td>${fmtDate(p.date)}</td><td>${esc(p.ep)}</td><td>${esc(p.title)}</td><td>${esc(p.time)}</td><td class="actions"><button class="btn primary editProg" data-id="${p.id}">Editar</button>${linked?'<span class="badge">Episódio cadastrado ✓</span>':`<button class="btn gold registerProg" data-id="${p.id}">Cadastrar episódio</button>`}<button class="btn danger deleteProg" data-id="${p.id}">Excluir</button></td></tr>`}).join('')}
 function renderEpisodes(){
  $('#episodeRows').innerHTML=state.episodes.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(e=>{
    const parts=(e.parts||[]).length;
@@ -269,8 +269,15 @@ async function loadTeamMemberMap(){
  const {data,error}=await supabaseClient.from('team_members').select('id,name').eq('active',true);
  if(!error) for(const m of (data||[])) teamMemberMap.set(m.id,m.name);
 }
+async function loadEpisodeProgramLinks(){
+ episodeProgramLinks=new Set();
+ const {data,error}=await supabaseClient.from('episodes').select('programming_id').not('programming_id','is',null);
+ if(error){console.error('EPISODE_LINKS_LOAD',error);return}
+ for(const e of (data||[])) if(e.programming_id) episodeProgramLinks.add(String(e.programming_id));
+}
 async function loadProgrammingFromSupabase(){
  await loadTeamMemberMap();
+ await loadEpisodeProgramLinks();
  const {data,error}=await supabaseClient.from('programming').select('id,episode_number,title,scheduled_date,scheduled_time,responsible_member_id,guest_name,observations,public_visible,status').order('scheduled_date',{ascending:true}).order('scheduled_time',{ascending:true});
  if(error){console.error('PROGRAMMING_LOAD',error);toast('Não foi possível carregar a Programação do Supabase.');return}
  state.programming=(data||[]).map(dbProgramToState);localStorage.setItem('va_v7_state',JSON.stringify(state));
@@ -301,7 +308,7 @@ $('#programRows').onclick=async e=>{
  const b=e.target.closest('button');if(!b)return;const id=b.dataset.id,p=state.programming.find(x=>String(x.id)===String(id));if(!p)return;
  if(b.classList.contains('editProg'))fillProgram(p);
  if(b.classList.contains('deleteProg')){const {error}=await supabaseClient.from('programming').delete().eq('id',id);if(error){console.error('PROGRAMMING_DELETE',error);toast('Não foi possível excluir o agendamento.');return}await loadProgrammingFromSupabase();renderAll();toast('Agendamento excluído do Supabase.');}
- if(b.classList.contains('registerProg')){if(!state.episodes.some(x=>x.ep===p.ep&&x.title===p.title))state.episodes.push({id:uid(),ep:p.ep,title:p.title,date:p.date,status:'Cadastrado',source:'Programação',youtube:'',duration:''});save();toast('Episódio cadastrado. A integração de Episódios com Supabase será a próxima etapa.');}
+ if(b.classList.contains('registerProg')){if(episodeProgramLinks.has(String(p.id))){toast('Este episódio já está cadastrado.');return}const {error}=await supabaseClient.from('episodes').insert({programming_id:p.id,episode_number:p.ep,title:p.title,status:'cadastrado',registered_by:currentUserId});if(error){console.error('EPISODE_REGISTER',error);toast('Não foi possível cadastrar o episódio.');return}await loadEpisodeProgramLinks();renderPrograms();toast('Episódio cadastrado no Supabase.');}
 };
 
 // episódios
