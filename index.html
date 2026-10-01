@@ -42,7 +42,7 @@ table{width:100%;border-collapse:collapse;background:#fff;border-radius:11px;ove
 
 <section class="private" id="private">
 <aside><div class="nav" id="nav">
-<button class="active" data-view="home">Visão geral</button><button data-view="program">Programação</button><button data-view="episodes">Episódios</button><button data-view="pauta">Pautas</button><button data-view="themes">Banco de Temas</button><button data-view="youtube">Central YouTube</button><button data-view="team">Equipe</button><button data-view="settings" data-admin>Configurações</button>
+<button class="active" data-view="home">Visão geral</button><button data-view="program" data-admin>Programação</button><button data-view="episodes">Episódios</button><button data-view="pauta">Pautas</button><button data-view="themes">Banco de Temas</button><button data-view="youtube" data-admin>Central YouTube</button><button data-view="team">Equipe</button><button data-view="settings" data-admin>Configurações</button>
 </div></aside>
 <main>
 <section class="view active" id="home"><h2>Visão geral</h2><div class="grid3"><div class="card"><b>Próximo episódio</b><h3 id="homeNext">—</h3></div><div class="card"><b>Programados</b><h3 id="homeScheduled" class="big-number">0</h3></div><div class="card"><b>Publicados</b><h3 id="homePublished" class="big-number">0</h3></div></div></section>
@@ -185,7 +185,7 @@ function pautaData(){return $$('.pautaBlock').map(b=>({tempo:b.querySelector('h3
 // navegação/login
 async function applyAuthenticatedUI(profile){
  auth=true;admin=profile?.role==='admin';currentUserId=profile?.user_id||null;
- await Promise.all([loadProgrammingFromSupabase(),loadTeamUsers()]);
+ await Promise.all([admin?loadProgrammingFromSupabase():loadPublicProgramming(),loadTeamUsers()]);
  $('#login').classList.remove('on');$('#public').classList.add('hidden');$('#private').classList.add('on');
  $('#who').style.display='inline';$('#who').textContent=admin?'Administrador':'Membro';$('#loginBtn').textContent='Sair';$('#loginMsg').textContent='';renderAll();
 }
