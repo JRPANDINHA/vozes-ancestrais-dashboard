@@ -27,7 +27,7 @@ table{width:100%;border-collapse:collapse;background:#fff;border-radius:11px;ove
 @media(max-width:850px){.stats,.grid3,.two{grid-template-columns:1fr}.private.on{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,1fr)}.day{min-height:75px;padding:4px}.public,main{padding:13px}.brand h1{font-size:24px}}
 </style>
 </head><body>
-<header><div class="head"><div class="brand"><small>PODCAST · TUPBI</small><h1>Vozes Ancestrais</h1><div style="color:#ead7a9;font:italic 14px Georgia,serif;margin-top:3px">“Quando a ancestralidade fala, o espírito reconhece o caminho.”</div></div><div style="display:flex;align-items:center;gap:12px"><span id="suggestHint" style="color:#f3dfad;font-size:14px;font-weight:800;white-space:nowrap">↓ Deixe uma Sugestão logo abaixo do Calendário</span><span id="who" style="display:none"></span><button class="btn gold" id="loginBtn">Login</button></div></div></header>
+<header><div class="head"><div class="brand"><small>PODCAST · TUPBI</small><h1>Vozes Ancestrais</h1><div style="color:#ead7a9;font:italic 14px Georgia,serif;margin-top:3px">“Quando a ancestralidade fala, o espírito reconhece o caminho.”</div></div><div style="display:flex;align-items:center;gap:12px"><a href="#sugestao-publica" id="suggestHint" style="display:inline-block;background:#f3dfad;color:#173b2d;border:2px solid #c8a45d;border-radius:9px;padding:9px 13px;font-size:14px;font-weight:800;white-space:nowrap;text-decoration:none">↓ Deixe uma Sugestão logo abaixo do Calendário</a><span id="who" style="display:none"></span><button class="btn gold" id="loginBtn">Login</button></div></div></header>
 
 <section class="public" id="public">
 <div class="cover"><div><h2>Vozes Ancestrais</h2><p>Calendário público, próximos episódios e publicações do canal oficial.</p></div></div>
@@ -37,7 +37,7 @@ table{width:100%;border-collapse:collapse;background:#fff;border-radius:11px;ove
 <div class="card"><b>Episódios publicados</b><h3 id="publishedCount" class="big-number">0</h3></div></div>
 <h2 class="section-title">Calendário</h2>
 <div class="calbox"><div class="calhead"><div class="actions"><button class="btn ghost" id="pubPrev">‹</button><button class="btn ghost" id="pubToday">Hoje</button></div><h3 id="pubMonth"></h3><button class="btn ghost" id="pubNext">›</button></div><div class="week"><div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div></div><div class="calendar" id="pubCal"></div></div>
-<h2 class="section-title">Sugira um tema</h2><div class="card"><input id="publicSuggestion" placeholder="Qual tema você gostaria de ouvir?"><button class="btn primary" id="suggestBtn">Enviar sugestão</button><div class="msg" id="suggestMsg"></div></div>
+<div id="sugestao-publica"></div><h2 class="section-title">Sugira um tema</h2><div class="card"><input id="publicSuggestion" placeholder="Qual tema você gostaria de ouvir?"><button class="btn primary" id="suggestBtn">Enviar sugestão</button><div class="msg" id="suggestMsg"></div></div>
 </section>
 
 <section class="private" id="private">
