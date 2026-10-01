@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vozes Ancestrais — TUPBI</title>
+<style>
+:root{--g:#173b2d;--gold:#c8a45d;--cream:#f7f3eb;--line:#ddd4c7}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--cream);color:#292622}
+header{background:var(--g);color:#fff;border-bottom:4px solid var(--gold);padding:15px 24px}.head{max-width:1180px;margin:auto;display:flex;justify-content:space-between;align-items:center}.brand small{color:#ead7a9;letter-spacing:.13em}.brand h1{font:700 31px Georgia,serif;margin:2px 0}.tag{color:#ead7a9;font:italic 14px Georgia,serif}
+.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer}.gold{background:var(--gold);color:#211b15}.primary{background:var(--g);color:#fff}.ghost{background:#eee7dc;color:#332c26}
+main{max-width:1180px;margin:auto;padding:24px}.cover{border-radius:19px;padding:28px;min-height:190px;color:#fff;display:flex;align-items:flex-end;background:linear-gradient(120deg,#15382a,#42573d 58%,#806847)}.cover h2{font:700 52px Georgia,serif;margin:0 0 8px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:20px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 3px 12px #0000000a}.big{font-size:48px;color:var(--g);margin:12px 0}.episodes{margin-top:18px}.ep{margin:8px 0}.login{display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center;padding:18px}.login.on{display:flex}.box{width:min(410px,100%);background:#fff;border-radius:16px;padding:22px}input{width:100%;padding:11px;border:1px solid #cfc5b7;border-radius:8px;margin:5px 0 12px}.msg{font-size:13px;margin-top:9px;color:#8b3838}.private{display:none}.private.on{display:block}.public.off{display:none}.ok{color:#356246}
+@media(max-width:800px){.stats{grid-template-columns:1fr}.cover h2{font-size:38px}}
+</style>
+</head>
+<body>
+<header><div class="head"><div class="brand"><small>PODCAST · TUPBI</small><h1>Vozes Ancestrais</h1><div class="tag">“Quando a ancestralidade fala, o espírito reconhece o caminho.”</div></div><button class="btn gold" id="loginBtn">Login</button></div></header>
+<main class="public" id="public">
+<div class="cover"><div><h2>Vozes Ancestrais</h2><p>Calendário público, próximos episódios e publicações do canal oficial.</p></div></div>
+<div class="stats">
+<div class="card"><b>Próximo agendamento</b><h3>Nenhum agendamento</h3></div>
+<div class="card"><b>Último publicado no YouTube</b><h3>EP 04 — O Próximo Passo: Tira-Dúvidas e Previsões (Ao Vivo)</h3></div>
+<div class="card"><b>Episódios publicados</b><div class="big">4</div></div>
+</div>
+<div class="card episodes"><h2>Publicados</h2>
+<div class="ep"><b>EP 01 — Introdução</b> · 01/03/2026</div>
+<div class="ep"><b>EP 02 — Desenvolvendo Nossa Ancestralidade</b> · 18/03/2026</div>
+<div class="ep"><b>EP 03 — Moral, Ética e Espiritualidade</b> · 12/04/2026</div>
+<div class="ep"><b>EP 04 — O Próximo Passo: Tira-Dúvidas e Previsões (Ao Vivo)</b> · 3 partes · datas exatas a sincronizar</div>
+</div>
+</main>
+<main class="private" id="private"><div class="card"><h2>Painel interno</h2><p class="ok"><b>Login realizado com sucesso.</b></p><p id="who"></p><p>Esta publicação online é a etapa de validação do login Supabase. Após a confirmação, o dashboard completo será conectado aos dados compartilhados.</p><button class="btn ghost" id="logout">Sair</button></div></main>
+<div class="login" id="modal"><div class="box"><h2>Login</h2><label>Login</label><input id="username" autocomplete="username" value="PANDA"><label>Senha</label><input id="password" type="password" autocomplete="current-password"><div><button class="btn primary" id="enter">Entrar</button> <button class="btn ghost" id="cancel">Cancelar</button></div><div class="msg" id="msg"></div></div></div>
+<script>
+const URL='https://pmoczuauonmpfqacvkon.supabase.co';
+const KEY='sb_publishable_RUcZihQgDqMs7SGC7ZOL9Q_sDzYsbAe';
+const $=s=>document.querySelector(s);
+$('#loginBtn').onclick=()=>{$('#modal').classList.add('on');$('#msg').textContent='';$('#password').focus()};
+$('#cancel').onclick=()=>$('#modal').classList.remove('on');
+$('#enter').onclick=async()=>{
+ const username=$('#username').value.trim(),password=$('#password').value;
+ if(!username||!password){$('#msg').textContent='Informe o login e a senha.';return}
+ $('#msg').textContent='Conectando...';$('#enter').disabled=true;
+ try{
+  const r=await fetch(URL+'/functions/v1/login-username',{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY},body:JSON.stringify({username,password})});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok||!data.success){$('#msg').textContent=(r.status===401?'Login ou senha incorretos.':(data.error||'Não foi possível realizar o login.'));return}
+  sessionStorage.setItem('va_access_token',data.session?.access_token||'');
+  sessionStorage.setItem('va_refresh_token',data.session?.refresh_token||'');
+  $('#who').textContent='Usuário: '+(data.user?.username||username)+' · Perfil: '+(data.user?.role||'');
+  $('#modal').classList.remove('on');$('#public').classList.add('off');$('#private').classList.add('on');$('#loginBtn').style.display='none';
+ }catch(e){$('#msg').textContent='Não foi possível conectar ao sistema.'}
+ finally{$('#enter').disabled=false}
+};
+$('#logout').onclick=()=>{sessionStorage.removeItem('va_access_token');sessionStorage.removeItem('va_refresh_token');$('#private').classList.remove('on');$('#public').classList.remove('off');$('#loginBtn').style.display='inline-block';$('#password').value=''};
+</script>
+</body></html>
