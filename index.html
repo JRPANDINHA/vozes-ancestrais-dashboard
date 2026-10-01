@@ -52,7 +52,9 @@ table{width:100%;border-collapse:collapse;background:#fff;border-radius:11px;ove
 <div class="card"><h3>Cadastrar / editar episódio</h3><input type="hidden" id="pId"><label>Data</label><input type="date" id="pDate"><label>Número do episódio</label><input id="pEp"><label>Tema / título</label><input id="pTitle"><label>Horário</label><input type="time" id="pTime"><label>Responsável</label><input id="pResponsible"><label>Convidado</label><input id="pGuest"><label>Observações internas</label><textarea id="pNotes" rows="3"></textarea><label><input type="checkbox" id="pPublic" style="width:auto;margin-right:7px" checked>Exibir no calendário público</label><div class="actions" style="margin-top:12px"><button class="btn primary" id="saveProgram">Salvar</button><button class="btn ghost" id="clearProgram">Limpar</button></div></div></div>
 <h3>Episódios programados</h3><table><thead><tr><th>Data</th><th>EP</th><th>Tema</th><th>Hora</th><th>Ações</th></tr></thead><tbody id="programRows"></tbody></table></section>
 
-<section class="view" id="episodes"><h2>Episódios</h2><table><thead><tr><th>EP</th><th>Título</th><th>Data</th><th>Status</th><th>Origem</th><th>Ações</th></tr></thead><tbody id="episodeRows"></tbody></table></section>
+<section class="view" id="episodes"><h2>Episódios</h2>
+<div class="card" style="margin-bottom:14px"><h3>Cadastrar episódio</h3><input type="hidden" id="eId"><label>Número do episódio</label><input id="eNumber" type="number" min="1"><label>Título</label><input id="eTitle"><label>Status</label><select id="eStatus"><option value="cadastrado">Cadastrado</option><option value="gravado">Gravado</option><option value="publicado">Publicado</option></select><div class="actions"><button class="btn primary" id="saveEpisode">Salvar episódio</button><button class="btn ghost" id="clearEpisode">Limpar</button></div></div>
+<table><thead><tr><th>EP</th><th>Título</th><th>Data</th><th>Status</th><th>Origem</th><th>Ações</th></tr></thead><tbody id="episodeRows"></tbody></table></section>
 
 <section class="view" id="pauta"><h2>Pautas</h2><div class="card"><h3>Roteirização por tempo</h3><label>Episódio da pauta</label><select id="pautaEpisode"></select><div id="pautaBlocks"></div><div class="actions"><button class="btn primary" id="savePauta">Salvar pauta</button><button class="btn ghost" id="printPauta">Imprimir / PDF</button></div></div></section>
 
@@ -185,7 +187,7 @@ function pautaData(){return $$('.pautaBlock').map(b=>({tempo:b.querySelector('h3
 // navegação/login
 async function applyAuthenticatedUI(profile){
  auth=true;admin=profile?.role==='admin';currentUserId=profile?.user_id||null;
- await Promise.all([admin?loadProgrammingFromSupabase():loadPublicProgramming(),loadTeamUsers()]);
+ await Promise.all([admin?loadProgrammingFromSupabase():loadPublicProgramming(),loadTeamUsers(),loadEpisodesFromSupabase()]);
  $('#login').classList.remove('on');$('#public').classList.add('hidden');$('#private').classList.add('on');
  $('#who').style.display='inline';$('#who').textContent=admin?'Administrador':'Membro';$('#loginBtn').textContent='Sair';$('#loginMsg').textContent='';renderAll();
 }
@@ -274,6 +276,12 @@ async function loadTeamMemberMap(){
  const {data,error}=await supabaseClient.from('team_members').select('id,name').eq('active',true);
  if(!error) for(const m of (data||[])) teamMemberMap.set(m.id,m.name);
 }
+async function loadEpisodesFromSupabase(){
+ const {data,error}=await supabaseClient.from('episodes').select('id,programming_id,source_theme_id,episode_number,title,status,registered_at,published_at,programming(scheduled_date)').order('registered_at',{ascending:false});
+ if(error){console.error('EPISODES_LOAD',error);toast('Não foi possível carregar os Episódios do Supabase.');return}
+ state.episodes=(data||[]).map(e=>({id:e.id,programming_id:e.programming_id||null,source_theme_id:e.source_theme_id||null,ep:String(e.episode_number??''),title:e.title,status:e.status||'cadastrado',date:e.programming?.scheduled_date||(e.published_at||e.registered_at||'').slice(0,10),source:e.programming_id?'Programação':'Cadastro direto',youtube:'',parts:[]}));
+ localStorage.setItem('va_v7_state',JSON.stringify(state));
+}
 async function loadEpisodeProgramLinks(){
  episodeProgramLinks=new Set();
  const {data,error}=await supabaseClient.from('episodes').select('programming_id').not('programming_id','is',null);
@@ -317,7 +325,29 @@ $('#programRows').onclick=async e=>{
 };
 
 // episódios
-$('#episodeRows').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=Number(b.dataset.id),ep=state.episodes.find(x=>x.id===id);if(!ep)return;if(b.classList.contains('openEpisode')&&ep.youtube)window.open(ep.youtube,'_blank');if(b.classList.contains('deleteEpisode')){state.episodes=state.episodes.filter(x=>x.id!==id);save();toast('Episódio excluído.');}if(b.classList.contains('editEpisode')){const t=prompt('Título:',ep.title);if(t===null)return;const d=prompt('Data (AAAA-MM-DD):',ep.date);if(d===null)return;ep.title=t.trim()||ep.title;ep.date=d.trim()||ep.date;save();toast('Episódio atualizado.')}};
+function clearEpisodeForm(){ $('#eId').value='';$('#eNumber').value='';$('#eTitle').value='';$('#eStatus').value='cadastrado';}
+$('#clearEpisode').onclick=clearEpisodeForm;
+$('#saveEpisode').onclick=async()=>{
+ const id=$('#eId').value, num=Number($('#eNumber').value), title=$('#eTitle').value.trim(), status=$('#eStatus').value;
+ if(!num||!title){toast('Informe o número e o título do episódio.');return}
+ const payload={episode_number:num,title,status,published_at:status==='publicado'?new Date().toISOString():null};
+ let error;
+ if(id)({error}=await supabaseClient.from('episodes').update(payload).eq('id',id));
+ else {payload.registered_by=currentUserId;({error}=await supabaseClient.from('episodes').insert(payload));}
+ if(error){console.error('EPISODE_SAVE',error);toast('Não foi possível salvar o episódio.');return}
+ await loadEpisodesFromSupabase();await loadEpisodeProgramLinks();clearEpisodeForm();renderAll();toast(id?'Episódio atualizado.':'Episódio cadastrado.');
+};
+$('#episodeRows').onclick=async e=>{
+ const b=e.target.closest('button');if(!b)return;const id=b.dataset.id,ep=state.episodes.find(x=>String(x.id)===String(id));if(!ep)return;
+ if(b.classList.contains('openEpisode')&&ep.youtube){window.open(ep.youtube,'_blank');return}
+ if(b.classList.contains('editEpisode')){$('#eId').value=ep.id;$('#eNumber').value=ep.ep;$('#eTitle').value=ep.title;$('#eStatus').value=ep.status;return}
+ if(b.classList.contains('deleteEpisode')){
+   if(!confirm('Excluir este episódio?'))return;
+   const {error}=await supabaseClient.from('episodes').delete().eq('id',id);
+   if(error){console.error('EPISODE_DELETE',error);toast('Não foi possível excluir o episódio.');return}
+   await loadEpisodesFromSupabase();await loadEpisodeProgramLinks();renderAll();toast('Episódio excluído.');
+ }
+};
 
 // temas
 $('#suggestBtn').onclick=()=>{const t=$('#publicSuggestion').value.trim();if(!t){$('#suggestMsg').textContent='Digite uma sugestão.';return}state.suggestions.push({id:uid(),text:t});$('#publicSuggestion').value='';$('#suggestMsg').textContent='Sugestão enviada.';save()};
