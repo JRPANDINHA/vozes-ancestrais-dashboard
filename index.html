@@ -133,7 +133,7 @@ seed.episodes.forEach(k=>{
 });
 localStorage.setItem('va_v7_state',JSON.stringify(state));
 const fmtDate=d=>d?d.split('-').reverse().join('/'):'Data a confirmar';
-let auth=false,admin=false,pubCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1),miniCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let auth=false,admin=false,currentUserId=null,teamUsers=[],pubCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1),miniCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 const save=()=>{localStorage.setItem('va_v7_state',JSON.stringify(state));renderAll()};
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('on');setTimeout(()=>$('#toast').classList.remove('on'),1800)}
 function allCalendarEvents(){
@@ -170,7 +170,7 @@ function renderYoutube(){
  }).join('');
  $('#ytEpisode').innerHTML=state.episodes.map(e=>`<option value="${e.id}">EP ${esc(e.ep)} — ${esc(e.title)}</option>`).join('');
 }
-function renderUsers(){$('#teamPublic').innerHTML=state.users.map(u=>`<div class="card"><h3>${esc(u.name)}</h3><span class="badge">${esc(u.role)}</span><p>${u.active?'Acesso ativo':'Acesso desativado'}</p></div>`).join('');$('#userRows').innerHTML=state.users.map(u=>`<div class="card" style="margin-top:9px"><b>${esc(u.name)}</b> · ${esc(u.login)}<div class="actions" style="margin-top:8px">${u.protected?'Conta administrativa protegida':`<button class="btn primary userEdit" data-id="${u.id}">Editar</button><button class="btn ghost userReset" data-id="${u.id}">Resetar senha</button><button class="btn ghost userToggle" data-id="${u.id}">${u.active?'Desativar':'Ativar'}</button><button class="btn danger userDelete" data-id="${u.id}">Remover</button>`}</div></div>`).join('')}
+function renderUsers(){const users=teamUsers.length?teamUsers:state.users.map(u=>({user_id:String(u.id),username:u.login,display_name:u.name,role:u.protected?'admin':'member',active:u.active,team_members:{name:u.name,podcast_role:u.role,active:u.active}}));$('#teamPublic').innerHTML=users.map(u=>{const m=u.team_members||{};return `<div class="card"><h3>${esc(m.name||u.display_name||u.username)}</h3><span class="badge">${esc(u.role==='admin'?'Administrador':(m.podcast_role||'Membro'))}</span><p>${u.active?'Acesso ativo':'Acesso desativado'}</p></div>`}).join('');$('#userRows').innerHTML=users.map(u=>{const name=u.team_members?.name||u.display_name||u.username;return `<div class="card" style="margin-top:9px"><b>${esc(name)}</b> · ${esc(u.username||'')}<div class="actions" style="margin-top:8px">${u.role==='admin'?'Conta administrativa protegida':`<button class="btn ghost userReset" data-id="${u.user_id}">Resetar senha</button>`}</div></div>`}).join('')}
 function pautaBlocks(){
  const ranges=['00:00–00:20','00:20–00:40','00:40–01:00','01:00–01:20','01:20–01:30'];
  const key=$('#pautaEpisode').value||'geral',data=state.pautas[key]||ranges.map((tempo,i)=>({tempo,assunto:i===0?'Abertura e introdução':i===4?'Encerramento':'',participantes:'',perguntas:'',obs:''}));
@@ -185,7 +185,7 @@ function pautaData(){return $$('.pautaBlock').map(b=>({tempo:b.querySelector('h3
 // navegação/login
 async function applyAuthenticatedUI(profile){
  auth=true;admin=profile?.role==='admin';currentUserId=profile?.user_id||null;
- await loadProgrammingFromSupabase();
+ await Promise.all([loadProgrammingFromSupabase(),loadTeamUsers()]);
  $('#login').classList.remove('on');$('#public').classList.add('hidden');$('#private').classList.add('on');
  $('#who').style.display='inline';$('#who').textContent=admin?'Administrador':'Membro';$('#loginBtn').textContent='Sair';$('#loginMsg').textContent='';renderAll();
 }
@@ -378,21 +378,19 @@ $('#cancelNewUser').onclick=()=>{
  $('#newUserForm').style.display='none';
  $('#newUserMsg').textContent='';
 };
-$('#saveNewUser').onclick=()=>{
+async function callTeamAdmin(body){const {data,error}=await supabaseClient.functions.invoke('team-admin',{body});if(error){let msg='Não foi possível concluir a operação.';try{const x=await error.context?.json();if(x?.error)msg=x.error}catch(_){}throw new Error(msg)}if(!data?.success)throw new Error(data?.error||'Não foi possível concluir a operação.');return data}
+async function loadTeamUsers(){if(!auth)return;try{const data=await callTeamAdmin({action:'list_users'});teamUsers=data.users||[]}catch(e){console.error('TEAM_USERS_LOAD',e);teamUsers=[]}}
+$('#saveNewUser').onclick=async()=>{
  if(!admin){toast('Somente o Administrador pode criar logins.');return}
- const name=$('#newUserName').value.trim(), login=$('#newUserLogin').value.trim(),
-       role=$('#newUserRole').value, password=$('#newUserPassword').value;
- if(!name||!login||!password){$('#newUserMsg').textContent='Preencha nome, login e senha inicial.';return}
- if(state.users.some(u=>u.login.toLowerCase()===login.toLowerCase())){
-   $('#newUserMsg').textContent='Esse login já existe.';return;
- }
- // A senha é usada apenas nesta prévia local para permitir testar o novo acesso.
- state.users.push({id:uid(),name,login,role,active:true,protected:false,password});
- $('#newUserName').value='';$('#newUserLogin').value='';$('#newUserPassword').value='';
- $('#newUserForm').style.display='none';$('#newUserMsg').textContent='';
- save();toast('Integrante e login criados.');
+ const name=$('#newUserName').value.trim(),username=$('#newUserLogin').value.trim(),podcast_role=$('#newUserRole').value,password=$('#newUserPassword').value,msg=$('#newUserMsg');
+ if(!name||!username||!password){msg.textContent='Preencha nome, login e senha inicial.';return}
+ if(password.length<6){msg.textContent='A senha deve ter pelo menos 6 caracteres.';return}
+ const btn=$('#saveNewUser');btn.disabled=true;msg.textContent='Criando integrante e login...';
+ try{await callTeamAdmin({action:'create_user',name,username,password,podcast_role});$('#newUserName').value='';$('#newUserLogin').value='';$('#newUserPassword').value='';$('#newUserForm').style.display='none';msg.textContent='';await loadTeamUsers();await loadTeamMemberMap();renderAll();toast('Integrante e login criados no Supabase.')}
+ catch(e){console.error('TEAM_CREATE',e);msg.textContent=e.message}
+ finally{btn.disabled=false}
 };
-$('#userRows').onclick=e=>{if(!admin)return;const b=e.target.closest('button');if(!b)return;const u=state.users.find(x=>x.id===Number(b.dataset.id));if(!u||u.protected)return;if(b.classList.contains('userEdit')){const n=prompt('Nome:',u.name);if(n===null)return;const l=prompt('Login:',u.login);if(l===null)return;const r=prompt('Função:',u.role);if(r===null)return;u.name=n;u.login=l;u.role=r;save();toast('Login atualizado.')}if(b.classList.contains('userReset')){const np=prompt('Digite a nova senha para '+u.name+':');if(np===null)return;if(np.length<6){toast('A nova senha deve ter pelo menos 6 caracteres.');return}const cp=prompt('Confirme a nova senha:');if(cp===null)return;if(np!==cp){toast('As senhas não coincidem.');return}toast('Para alterar a senha de outro integrante com segurança, falta ativar a função administrativa do Supabase. Nenhuma senha foi alterada.');}if(b.classList.contains('userToggle')){u.active=!u.active;save();toast(u.active?'Acesso ativado.':'Acesso desativado.')}if(b.classList.contains('userDelete')){state.users=state.users.filter(x=>x.id!==u.id);save();toast('Login removido.');}};
+$('#userRows').onclick=async e=>{if(!admin)return;const b=e.target.closest('.userReset');if(!b)return;const u=teamUsers.find(x=>String(x.user_id)===String(b.dataset.id));if(!u||u.role==='admin')return;const name=u.team_members?.name||u.display_name||u.username;const np=prompt('Digite a nova senha para '+name+':');if(np===null)return;if(np.length<6){toast('A nova senha deve ter pelo menos 6 caracteres.');return}const cp=prompt('Confirme a nova senha:');if(cp===null)return;if(np!==cp){toast('As senhas não coincidem.');return}b.disabled=true;try{await callTeamAdmin({action:'reset_password',user_id:u.user_id,password:np});toast('Senha alterada com sucesso.')}catch(err){console.error('TEAM_RESET_PASSWORD',err);toast(err.message)}finally{b.disabled=false}};
 $('#changeMyPassword').onclick=async()=>{const p1=$('#myNewPassword').value,p2=$('#myNewPassword2').value,msg=$('#myPasswordMsg');msg.textContent='';if(!p1||!p2){msg.textContent='Preencha e confirme a nova senha.';return}if(p1.length<6){msg.textContent='Use uma senha com pelo menos 6 caracteres.';return}if(p1!==p2){msg.textContent='As senhas não coincidem.';return}const btn=$('#changeMyPassword');btn.disabled=true;msg.textContent='Alterando senha...';const {error}=await supabaseClient.auth.updateUser({password:p1});btn.disabled=false;if(error){console.error('SELF_PASSWORD_CHANGE',error);msg.textContent='Não foi possível alterar a senha.';return}$('#myNewPassword').value='';$('#myNewPassword2').value='';msg.textContent='Senha alterada com sucesso.';toast('Sua senha foi alterada.');};
 $('#backupBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='vozes-ancestrais-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Backup exportado.')};
 
