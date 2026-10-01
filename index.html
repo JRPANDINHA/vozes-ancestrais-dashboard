@@ -170,7 +170,7 @@ function renderYoutube(){
  }).join('');
  $('#ytEpisode').innerHTML=state.episodes.map(e=>`<option value="${e.id}">EP ${esc(e.ep)} — ${esc(e.title)}</option>`).join('');
 }
-function renderUsers(){const users=teamUsers.length?teamUsers:state.users.map(u=>({user_id:String(u.id),username:u.login,display_name:u.name,role:u.protected?'admin':'member',active:u.active,team_members:{name:u.name,podcast_role:u.role,active:u.active}}));$('#teamPublic').innerHTML=users.map(u=>{const m=u.team_members||{};return `<div class="card"><h3>${esc(m.name||u.display_name||u.username)}</h3><span class="badge">${esc(u.role==='admin'?'Administrador':(m.podcast_role||'Membro'))}</span><p>${u.active?'Acesso ativo':'Acesso desativado'}</p></div>`}).join('');$('#userRows').innerHTML=users.map(u=>{const name=u.team_members?.name||u.display_name||u.username;return `<div class="card" style="margin-top:9px"><b>${esc(name)}</b> · ${esc(u.username||'')}<div class="actions" style="margin-top:8px">${u.role==='admin'?'Conta administrativa protegida':`<button class="btn ghost userReset" data-id="${u.user_id}">Resetar senha</button>`}</div></div>`}).join('')}
+function renderUsers(){const users=teamUsers.length?teamUsers:state.users.map(u=>({user_id:String(u.id),username:u.login,display_name:u.name,role:u.protected?'admin':'member',active:u.active,team_members:{name:u.name,podcast_role:u.role,active:u.active}}));$('#teamPublic').innerHTML=users.map(u=>{const m=u.team_members||{};return `<div class="card"><h3>${esc(m.name||u.display_name||u.username)}</h3><span class="badge">${esc(u.role==='admin'?'Administrador':(m.podcast_role||'Membro'))}</span><p>${u.active?'Acesso ativo':'Acesso desativado'}</p></div>`}).join('');$('#userRows').innerHTML=users.map(u=>{const name=u.team_members?.name||u.display_name||u.username;return `<div class="card" style="margin-top:9px"><b>${esc(name)}</b> · ${esc(u.username||'')}<div class="actions" style="margin-top:8px">${u.role==='admin'?'Conta administrativa protegida':`<button class="btn primary userEdit" data-id="${u.user_id}">Editar</button><button class="btn ghost userReset" data-id="${u.user_id}">Resetar senha</button><button class="btn ghost userToggle" data-id="${u.user_id}">${u.active?'Desativar':'Ativar'}</button><button class="btn danger userDelete" data-id="${u.user_id}">Remover</button>`}</div></div>`}).join('')}
 function pautaBlocks(){
  const ranges=['00:00–00:20','00:20–00:40','00:40–01:00','01:00–01:20','01:20–01:30'];
  const key=$('#pautaEpisode').value||'geral',data=state.pautas[key]||ranges.map((tempo,i)=>({tempo,assunto:i===0?'Abertura e introdução':i===4?'Encerramento':'',participantes:'',perguntas:'',obs:''}));
@@ -390,7 +390,36 @@ $('#saveNewUser').onclick=async()=>{
  catch(e){console.error('TEAM_CREATE',e);msg.textContent=e.message}
  finally{btn.disabled=false}
 };
-$('#userRows').onclick=async e=>{if(!admin)return;const b=e.target.closest('.userReset');if(!b)return;const u=teamUsers.find(x=>String(x.user_id)===String(b.dataset.id));if(!u||u.role==='admin')return;const name=u.team_members?.name||u.display_name||u.username;const np=prompt('Digite a nova senha para '+name+':');if(np===null)return;if(np.length<6){toast('A nova senha deve ter pelo menos 6 caracteres.');return}const cp=prompt('Confirme a nova senha:');if(cp===null)return;if(np!==cp){toast('As senhas não coincidem.');return}b.disabled=true;try{await callTeamAdmin({action:'reset_password',user_id:u.user_id,password:np});toast('Senha alterada com sucesso.')}catch(err){console.error('TEAM_RESET_PASSWORD',err);toast(err.message)}finally{b.disabled=false}};
+$('#userRows').onclick=async e=>{
+ if(!admin)return;const btn=e.target.closest('button');if(!btn)return;
+ const u=teamUsers.find(x=>String(x.user_id)===String(btn.dataset.id));if(!u||u.role==='admin')return;
+ const name=u.team_members?.name||u.display_name||u.username;
+ btn.disabled=true;
+ try{
+  if(btn.classList.contains('userReset')){
+   const np=prompt('Digite a nova senha para '+name+':');if(np===null)return;
+   if(np.length<6){toast('A nova senha deve ter pelo menos 6 caracteres.');return}
+   const cp=prompt('Confirme a nova senha:');if(cp===null)return;
+   if(np!==cp){toast('As senhas não coincidem.');return}
+   await callTeamAdmin({action:'reset_password',user_id:u.user_id,password:np});toast('Senha alterada com sucesso.');
+  }else if(btn.classList.contains('userEdit')){
+   const n=prompt('Nome:',name);if(n===null)return;
+   const l=prompt('Login:',u.username||'');if(l===null)return;
+   const atual=u.team_members?.podcast_role||'Organizador';
+   const r=prompt('Função (Apresentador, Organizador ou Sacerdotisa):',atual);if(r===null)return;
+   const role=r.trim();
+   if(!['Apresentador','Organizador','Sacerdotisa'].includes(role)){toast('Escolha uma função válida.');return}
+   await callTeamAdmin({action:'update_user',user_id:u.user_id,name:n.trim(),username:l.trim(),podcast_role:role});toast('Integrante atualizado.');
+  }else if(btn.classList.contains('userToggle')){
+   await callTeamAdmin({action:'set_active',user_id:u.user_id,active:!u.active});toast(u.active?'Acesso desativado.':'Acesso ativado.');
+  }else if(btn.classList.contains('userDelete')){
+   if(!confirm('Remover '+name+' da equipe e excluir o acesso ao sistema?'))return;
+   await callTeamAdmin({action:'delete_user',user_id:u.user_id});toast('Integrante removido.');
+  }
+  await loadTeamUsers();await loadTeamMemberMap();renderAll();
+ }catch(err){console.error('TEAM_ADMIN_ACTION',err);toast(err.message)}
+ finally{btn.disabled=false}
+};
 $('#changeMyPassword').onclick=async()=>{const p1=$('#myNewPassword').value,p2=$('#myNewPassword2').value,msg=$('#myPasswordMsg');msg.textContent='';if(!p1||!p2){msg.textContent='Preencha e confirme a nova senha.';return}if(p1.length<6){msg.textContent='Use uma senha com pelo menos 6 caracteres.';return}if(p1!==p2){msg.textContent='As senhas não coincidem.';return}const btn=$('#changeMyPassword');btn.disabled=true;msg.textContent='Alterando senha...';const {error}=await supabaseClient.auth.updateUser({password:p1});btn.disabled=false;if(error){console.error('SELF_PASSWORD_CHANGE',error);msg.textContent='Não foi possível alterar a senha.';return}$('#myNewPassword').value='';$('#myNewPassword2').value='';msg.textContent='Senha alterada com sucesso.';toast('Sua senha foi alterada.');};
 $('#backupBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='vozes-ancestrais-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Backup exportado.')};
 
