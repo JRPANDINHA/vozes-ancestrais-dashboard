@@ -179,12 +179,14 @@ function pautaData(){return $$('.pautaBlock').map(b=>({tempo:b.querySelector('h3
 
 // navegação/login
 async function applyAuthenticatedUI(profile){
- auth=true;admin=profile?.role==='admin';
+ auth=true;admin=profile?.role==='admin';currentUserId=profile?.user_id||null;
+ await loadProgrammingFromSupabase();
  $('#login').classList.remove('on');$('#public').classList.add('hidden');$('#private').classList.add('on');
  $('#who').style.display='inline';$('#who').textContent=admin?'Administrador':'Membro';$('#loginBtn').textContent='Sair';$('#loginMsg').textContent='';renderAll();
 }
 async function applyPublicUI(){
- auth=false;admin=false;$('#private').classList.remove('on');$('#public').classList.remove('hidden');
+ auth=false;admin=false;currentUserId=null;
+ await loadPublicProgramming();$('#private').classList.remove('on');$('#public').classList.remove('hidden');
  $('#who').style.display='none';$('#who').textContent='';$('#loginBtn').textContent='Login';renderAll();
 }
 async function loadProfile(userId){
@@ -258,10 +260,49 @@ $('#pubPrev').onclick=()=>{pubCursor=new Date(pubCursor.getFullYear(),pubCursor.
 $('#miniPrev').onclick=()=>{miniCursor=new Date(miniCursor.getFullYear(),miniCursor.getMonth()-1,1);renderAll()};$('#miniNext').onclick=()=>{miniCursor=new Date(miniCursor.getFullYear(),miniCursor.getMonth()+1,1);renderAll()};
 $('#miniCal').onclick=e=>{const d=e.target.closest('.day');if(!d)return;const p=state.programming.find(x=>x.date===d.dataset.date);p?fillProgram(p):clearProgram(d.dataset.date)};
 
-// programação
-$('#saveProgram').onclick=()=>{const p={id:Number($('#pId').value)||uid(),date:$('#pDate').value,ep:$('#pEp').value.trim(),title:$('#pTitle').value.trim(),time:$('#pTime').value,responsible:$('#pResponsible').value.trim(),guest:$('#pGuest').value.trim(),notes:$('#pNotes').value.trim(),public:$('#pPublic').checked};if(!p.date||!p.ep||!p.title||!p.time){toast('Preencha data, EP, tema e horário.');return}const i=state.programming.findIndex(x=>x.id===p.id);i>=0?state.programming[i]=p:state.programming.push(p);clearProgram();save();toast(i>=0?'Programação atualizada.':'Episódio programado.')};
+// programação — Supabase compartilhado
+function dbProgramToState(row){
+ return {id:row.id,date:row.scheduled_date||'',ep:row.episode_number||'',title:row.title||'',time:(row.scheduled_time||'').slice(0,5),responsible:teamMemberMap.get(row.responsible_member_id)||'',responsible_member_id:row.responsible_member_id||null,guest:row.guest_name||'',notes:row.observations||'',public:!!row.public_visible,status:row.status||'agendado'};
+}
+async function loadTeamMemberMap(){
+ teamMemberMap=new Map();
+ const {data,error}=await supabaseClient.from('team_members').select('id,name').eq('active',true);
+ if(!error) for(const m of (data||[])) teamMemberMap.set(m.id,m.name);
+}
+async function loadProgrammingFromSupabase(){
+ await loadTeamMemberMap();
+ const {data,error}=await supabaseClient.from('programming').select('id,episode_number,title,scheduled_date,scheduled_time,responsible_member_id,guest_name,observations,public_visible,status').order('scheduled_date',{ascending:true}).order('scheduled_time',{ascending:true});
+ if(error){console.error('PROGRAMMING_LOAD',error);toast('Não foi possível carregar a Programação do Supabase.');return}
+ state.programming=(data||[]).map(dbProgramToState);localStorage.setItem('va_v7_state',JSON.stringify(state));
+}
+async function loadPublicProgramming(){
+ const {data,error}=await supabaseClient.rpc('get_public_programming');
+ if(error){console.error('PUBLIC_PROGRAMMING_LOAD',error);state.programming=[];return}
+ state.programming=(data||[]).map(r=>({id:r.id,date:r.scheduled_date||'',ep:r.episode_number||'',title:r.title||'',time:(r.scheduled_time||'').slice(0,5),responsible:'',guest:'',notes:'',public:true,status:r.status||'agendado'}));
+}
+function resolveResponsibleId(name){
+ const wanted=(name||'').trim().toLocaleLowerCase('pt-BR');if(!wanted)return null;
+ for(const [id,n] of teamMemberMap.entries()) if(String(n).trim().toLocaleLowerCase('pt-BR')===wanted)return id;
+ return undefined;
+}
+$('#saveProgram').onclick=async()=>{
+ const id=$('#pId').value.trim(),date=$('#pDate').value,ep=$('#pEp').value.trim(),title=$('#pTitle').value.trim(),time=$('#pTime').value,responsible=$('#pResponsible').value.trim(),guest=$('#pGuest').value.trim(),notes=$('#pNotes').value.trim(),pub=$('#pPublic').checked;
+ if(!date||!ep||!title||!time){toast('Preencha data, EP, tema e horário.');return}
+ const responsibleId=resolveResponsibleId(responsible);if(responsibleId===undefined){toast('O responsável precisa estar cadastrado em Equipe.');return}
+ const payload={episode_number:ep,title,scheduled_date:date,scheduled_time:time,responsible_member_id:responsibleId,guest_name:guest||null,observations:notes||null,public_visible:pub,status:'agendado'};
+ let error;
+ if(id){({error}=await supabaseClient.from('programming').update(payload).eq('id',id));}
+ else {payload.created_by=currentUserId;({error}=await supabaseClient.from('programming').insert(payload));}
+ if(error){console.error('PROGRAMMING_SAVE',error);toast('Não foi possível salvar a Programação.');return}
+ await loadProgrammingFromSupabase();clearProgram();renderAll();toast(id?'Programação atualizada.':'Episódio programado no Supabase.');
+};
 $('#clearProgram').onclick=()=>clearProgram();
-$('#programRows').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=Number(b.dataset.id),p=state.programming.find(x=>x.id===id);if(!p)return;if(b.classList.contains('editProg'))fillProgram(p);if(b.classList.contains('deleteProg')){state.programming=state.programming.filter(x=>x.id!==id);save();toast('Agendamento excluído.');}if(b.classList.contains('registerProg')){if(!state.episodes.some(x=>x.ep===p.ep&&x.title===p.title))state.episodes.push({id:uid(),ep:p.ep,title:p.title,date:p.date,status:'Cadastrado',source:'Programação',youtube:'',duration:''});save();toast('Episódio cadastrado e sincronizado com Episódios e Calendário.')}};
+$('#programRows').onclick=async e=>{
+ const b=e.target.closest('button');if(!b)return;const id=b.dataset.id,p=state.programming.find(x=>String(x.id)===String(id));if(!p)return;
+ if(b.classList.contains('editProg'))fillProgram(p);
+ if(b.classList.contains('deleteProg')){const {error}=await supabaseClient.from('programming').delete().eq('id',id);if(error){console.error('PROGRAMMING_DELETE',error);toast('Não foi possível excluir o agendamento.');return}await loadProgrammingFromSupabase();renderAll();toast('Agendamento excluído do Supabase.');}
+ if(b.classList.contains('registerProg')){if(!state.episodes.some(x=>x.ep===p.ep&&x.title===p.title))state.episodes.push({id:uid(),ep:p.ep,title:p.title,date:p.date,status:'Cadastrado',source:'Programação',youtube:'',duration:''});save();toast('Episódio cadastrado. A integração de Episódios com Supabase será a próxima etapa.');}
+};
 
 // episódios
 $('#episodeRows').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=Number(b.dataset.id),ep=state.episodes.find(x=>x.id===id);if(!ep)return;if(b.classList.contains('openEpisode')&&ep.youtube)window.open(ep.youtube,'_blank');if(b.classList.contains('deleteEpisode')){state.episodes=state.episodes.filter(x=>x.id!==id);save();toast('Episódio excluído.');}if(b.classList.contains('editEpisode')){const t=prompt('Título:',ep.title);if(t===null)return;const d=prompt('Data (AAAA-MM-DD):',ep.date);if(d===null)return;ep.title=t.trim()||ep.title;ep.date=d.trim()||ep.date;save();toast('Episódio atualizado.')}};
