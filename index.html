@@ -23,11 +23,11 @@ table{width:100%;border-collapse:collapse;background:#fff;border-radius:11px;ove
 .day.today{border:3px solid var(--gold);box-shadow:inset 0 0 0 2px #fff,0 0 0 1px var(--gold);background:#fffaf0}
 .day.has-scheduled{border:3px solid var(--g2);box-shadow:0 0 0 2px rgba(36,75,57,.12)}
 .day.today.has-scheduled{border-color:var(--gold);box-shadow:inset 0 0 0 2px #fff,0 0 0 2px var(--g2)}
-.suggest-hint{display:block;color:#ead7a9;font-size:13px;font-weight:700;margin-right:12px;max-width:230px;line-height:1.25;text-align:right}
+.suggest-hint{display:inline-flex!important;align-items:center!important;background:#f3dfad!important;color:#173b2d!important;border:2px solid var(--gold)!important;border-radius:10px!important;padding:9px 13px!important;font-size:14px!important;font-weight:800!important;line-height:1.2!important;white-space:nowrap!important;visibility:visible!important;opacity:1!important}
 @media(max-width:850px){.stats,.grid3,.two{grid-template-columns:1fr}.private.on{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,1fr)}.day{min-height:75px;padding:4px}.public,main{padding:13px}.brand h1{font-size:24px}}
 </style>
 </head><body>
-<header><div class="head"><div class="brand"><small>PODCAST · TUPBI</small><h1>Vozes Ancestrais</h1><div style="color:#ead7a9;font:italic 14px Georgia,serif;margin-top:3px">“Quando a ancestralidade fala, o espírito reconhece o caminho.”</div></div><div style="display:flex;align-items:center;gap:10px"><span class="suggest-hint" id="suggestHint">Deixe uma Sugestão logo abaixo do Calendário</span><span id="who" style="display:none"></span><button class="btn gold" id="loginBtn">Login</button></div></div></header>
+<header><div class="head"><div class="brand"><small>PODCAST · TUPBI</small><h1>Vozes Ancestrais</h1><div style="color:#ead7a9;font:italic 14px Georgia,serif;margin-top:3px">“Quando a ancestralidade fala, o espírito reconhece o caminho.”</div></div><div style="display:flex;align-items:center;gap:10px"><span class="suggest-hint" id="suggestHint">Deixe uma Sugestão logo abaixo do Calendário ↓</span><span id="who" style="display:none"></span><button class="btn gold" id="loginBtn">Login</button></div></div></header>
 
 <section class="public" id="public">
 <div class="cover"><div><h2>Vozes Ancestrais</h2><p>Calendário público, próximos episódios e publicações do canal oficial.</p></div></div>
