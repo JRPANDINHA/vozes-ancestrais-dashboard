@@ -20,10 +20,14 @@ input,textarea,select{width:100%;border:1px solid #cfc5b7;border-radius:8px;padd
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:11px;overflow:hidden}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#eee8dc;color:var(--g);font-size:13px}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#ece2cf;font-size:11px}.big-number{font-size:52px!important;line-height:1;font-weight:800;margin:18px 0 6px!important;color:var(--g)!important}
 .two{display:grid;grid-template-columns:.85fr 1.15fr;gap:15px;align-items:start}.mini .day{min-height:54px;padding:5px}.mini .event{font-size:9px;padding:3px}.login{display:none;position:fixed;inset:0;background:#0008;z-index:60;align-items:center;justify-content:center;padding:18px}.login.on{display:flex}.loginbox{width:min(410px,100%);background:#fff;border-radius:16px;padding:22px}
 .toast{position:fixed;right:18px;bottom:18px;background:#173b2d;color:#fff;padding:11px 15px;border-radius:9px;z-index:90;opacity:0;pointer-events:none;transition:.2s}.toast.on{opacity:1}.msg{font-size:13px;color:#356246;margin-top:7px}
+.day.today{border:3px solid var(--gold);box-shadow:inset 0 0 0 2px #fff,0 0 0 1px var(--gold);background:#fffaf0}
+.day.has-scheduled{border:3px solid var(--g2);box-shadow:0 0 0 2px rgba(36,75,57,.12)}
+.day.today.has-scheduled{border-color:var(--gold);box-shadow:inset 0 0 0 2px #fff,0 0 0 2px var(--g2)}
+.suggest-hint{display:block;color:#ead7a9;font-size:13px;font-weight:700;margin-right:12px;max-width:230px;line-height:1.25;text-align:right}
 @media(max-width:850px){.stats,.grid3,.two{grid-template-columns:1fr}.private.on{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,1fr)}.day{min-height:75px;padding:4px}.public,main{padding:13px}.brand h1{font-size:24px}}
 </style>
 </head><body>
-<header><div class="head"><div class="brand"><small>PODCAST · TUPBI</small><h1>Vozes Ancestrais</h1><div style="color:#ead7a9;font:italic 14px Georgia,serif;margin-top:3px">“Quando a ancestralidade fala, o espírito reconhece o caminho.”</div></div><div><span id="who" style="display:none"></span><button class="btn gold" id="loginBtn">Login</button></div></div></header>
+<header><div class="head"><div class="brand"><small>PODCAST · TUPBI</small><h1>Vozes Ancestrais</h1><div style="color:#ead7a9;font:italic 14px Georgia,serif;margin-top:3px">“Quando a ancestralidade fala, o espírito reconhece o caminho.”</div></div><div style="display:flex;align-items:center;gap:10px"><span class="suggest-hint" id="suggestHint">Deixe uma Sugestão logo abaixo do Calendário</span><span id="who" style="display:none"></span><button class="btn gold" id="loginBtn">Login</button></div></div></header>
 
 <section class="public" id="public">
 <div class="cover"><div><h2>Vozes Ancestrais</h2><p>Calendário público, próximos episódios e publicações do canal oficial.</p></div></div>
@@ -128,7 +132,7 @@ seed.episodes.forEach(k=>{
 });
 localStorage.setItem('va_v7_state',JSON.stringify(state));
 const fmtDate=d=>d?d.split('-').reverse().join('/'):'Data a confirmar';
-let auth=false,admin=false,pubCursor=new Date(2026,8,1),miniCursor=new Date(2026,8,1);
+let auth=false,admin=false,pubCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1),miniCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 const save=()=>{localStorage.setItem('va_v7_state',JSON.stringify(state));renderAll()};
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('on');setTimeout(()=>$('#toast').classList.remove('on'),1800)}
 function allCalendarEvents(){
@@ -142,8 +146,8 @@ function calendar(el,titleEl,cursor,mini=false){
  const first=new Date(cursor.getFullYear(),cursor.getMonth(),1),start=new Date(first);start.setDate(1-first.getDay());
  const events=allCalendarEvents();
  for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
- const c=document.createElement('div');c.className='day'+(d.getMonth()!=cursor.getMonth()?' out':'');c.dataset.date=iso;c.innerHTML=`<span class="num">${d.getDate()}</span>`;
- events.filter(x=>x.date===iso).forEach(x=>{const e=document.createElement('div');e.className='event '+(x.type==='published'?'published':'');e.innerHTML=`<b>${esc(x.label)}</b><br>${esc(x.title)}`;c.appendChild(e)});el.appendChild(c)}
+ const c=document.createElement('div');const today=new Date(),todayIso=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;const dayEvents=events.filter(x=>x.date===iso);const hasScheduled=dayEvents.some(x=>x.type==='scheduled');c.className='day'+(d.getMonth()!=cursor.getMonth()?' out':'')+(iso===todayIso?' today':'')+(hasScheduled?' has-scheduled':'');c.dataset.date=iso;c.innerHTML=`<span class="num">${d.getDate()}</span>`;
+ dayEvents.forEach(x=>{const e=document.createElement('div');e.className='event '+(x.type==='published'?'published':'');e.innerHTML=`<b>${esc(x.label)}</b><br>${esc(x.title)}`;c.appendChild(e)});el.appendChild(c)}
 }
 function nextScheduled(){return state.programming.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))[0]}
 function renderStats(){const n=nextScheduled(),published=state.episodes.filter(x=>x.status==='Publicado');const lastPublished=[...published].sort((a,b)=>{const ea=Number(String(a.ep).replace(/\D/g,''))||0,eb=Number(String(b.ep).replace(/\D/g,''))||0;return eb-ea})[0];$('#nextPublic').textContent=n?`EP ${n.ep} — ${n.title} · ${fmtDate(n.date)} ${n.time}`:'Nenhum agendamento';$('#lastYoutube').textContent=lastPublished?`EP ${lastPublished.ep} — ${lastPublished.title}`:'—';$('#publishedCount').textContent=published.length;$('#homeNext').textContent=n?`EP ${n.ep} — ${n.title}`:'—';$('#homeScheduled').textContent=state.programming.length;$('#homePublished').textContent=published.length}
